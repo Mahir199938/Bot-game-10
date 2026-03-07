@@ -3,184 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوت المحترفين V6 - نظام الأهداف</title>
+    <title>بوت المحترفين V6.1 - النسخة المصلحة</title>
     <style>
         body { font-family: sans-serif; background-color: #020617; color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        .scorecard { background: #1e293b; border: 2px solid #38bdf8; border-radius: 12px; padding: 12px; width: 95%; max-width: 420px; margin-top: 5px; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
         
-        .scorecard { background: #1e293b; border: 2px solid #38bdf8; border-radius: 12px; padding: 15px; width: 95%; max-width: 420px; margin-top: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
-        .stats-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; border-bottom: 1px solid #334155; padding-bottom: 5px; }
+        /* ميزة 1: شريط الأهداف */
+        .goal-box { background: rgba(16, 185, 129, 0.1); border: 1px dashed #10b981; border-radius: 8px; padding: 5px 10px; margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 11px; }
+        .goal-achieved { background: rgba(251, 191, 36, 0.3) !important; border: 2px solid #fbbf24 !important; animation: glow 1s infinite alternate; }
+        @keyframes glow { from { box-shadow: 0 0 5px #fbbf24; } to { box-shadow: 0 0 15px #fbbf24; } }
 
-        /* ميزة 3: خريطة الحرارة للفئات */
-        .heatmap-container { display: flex; gap: 10px; margin: 10px 0; height: 12px; }
-        .heat-bar { flex: 1; border-radius: 6px; position: relative; background: #334155; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
+        .prediction-text { color: #fbbf24; font-size: 30px; font-weight: bold; display: block; text-align: center; margin: 5px 0; }
+        
+        /* ميزة 2: شريط السجل (تم إعادته) */
+        .history-bar { background: #0f172a; border-radius: 6px; padding: 8px; margin: 10px 0; font-size: 11px; overflow-x: auto; display: flex; gap: 6px; border: 1px solid #334155; min-height: 20px; }
+        .history-item { background: #334155; padding: 2px 8px; border-radius: 4px; white-space: nowrap; border: 1px solid #475569; }
+
+        /* ميزة 3: خريطة الحرارة */
+        .heatmap { display: flex; gap: 5px; height: 10px; margin-top: 10px; }
+        .heat-bar { flex: 1; border-radius: 5px; background: #334155; overflow: hidden; position: relative; }
         .heat-fill { height: 100%; transition: width 0.5s; }
-        .heat-label { position: absolute; width: 100%; text-align: center; font-size: 9px; line-height: 12px; font-weight: bold; color: white; text-shadow: 1px 1px 2px black; }
 
-        /* ميزة 1: نظام الأهداف */
-        .goal-box { background: rgba(16, 185, 129, 0.1); border: 1px dashed #10b981; border-radius: 8px; padding: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-        .goal-achieved { animation: gold-glow 1s infinite alternate; border: 2px solid #fbbf24 !important; background: rgba(251, 191, 36, 0.2) !important; }
-        @keyframes gold-glow { from { box-shadow: 0 0 5px #fbbf24; } to { box-shadow: 0 0 20px #fbbf24; } }
-
-        .prediction-text { color: #fbbf24; font-size: 30px; font-weight: bold; display: block; text-align: center; }
-        .bet-display { font-size: 18px; text-align: center; margin-top: 5px; color: #f87171; font-weight: bold; }
-
-        .sniper-radar { background: rgba(56, 189, 248, 0.05); border: 1px solid #334155; border-radius: 8px; padding: 6px; margin: 10px 0; text-align: center; font-size: 13px; }
-        .prob-container { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
-        .prob-item { display: flex; align-items: center; gap: 8px; font-size: 11px; }
-        .prob-bar-bg { background: #334155; height: 5px; flex-grow: 1; border-radius: 3px; }
-        .prob-bar-fill { height: 100%; transition: width 0.4s; border-radius: 3px; }
-
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 95%; max-width: 420px; margin-top: 12px; }
-        button { color: white; border: none; padding: 15px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 95%; max-width: 420px; margin-top: 10px; }
+        button { color: white; border: none; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-meat { background: #991b1b; border-bottom: 4px solid #7f1d1d; } 
         .btn-veg { background: #166534; border-bottom: 4px solid #14532d; }
+        button:active { transform: scale(0.95); }
 
-        .update-area { margin-top: 15px; background: #1e293b; padding: 10px; border-radius: 10px; width: 95%; max-width: 420px; display: flex; gap: 5px; flex-wrap: wrap; }
-        input { padding: 8px; border-radius: 5px; border: 1px solid #38bdf8; background: #0f172a; color: white; flex: 1; min-width: 100px; }
+        .update-area { margin-top: 15px; background: #1e293b; padding: 10px; border-radius: 10px; width: 95%; max-width: 420px; display: flex; gap: 5px; }
+        input { padding: 8px; border-radius: 5px; border: 1px solid #38bdf8; background: #0f172a; color: white; width: 45%; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <div class="scorecard" id="mainCard">
+    <div class="scorecard">
         <div class="goal-box" id="goalBox">
-            <span>الهدف: <b id="targetGoal">50,000+</b></span>
-            <span>التقدم: <b id="currentProgress">0%</b></span>
+            <span>الهدف: <b id="targetGoal">50,000</b></span>
+            <span>التقدم: <b id="progressText">0%</b></span>
         </div>
 
         <div class="stats-row">
             <span>الرصيد: <b id="balance" style="color: #4caf50;">0</b></span>
-            <span>الربح: <b id="sessionProfit">0</b></span>
-        </div>
-
-        <div class="heatmap-container">
-            <div class="heat-bar"><div id="meatHeat" class="heat-fill" style="background: #ef4444; width: 50%;"></div><div class="heat-label">اللحوم</div></div>
-            <div class="heat-bar"><div id="vegHeat" class="heat-fill" style="background: #22c55e; width: 50%;"></div><div class="heat-label">الخضروات</div></div>
-        </div>
-
-        <div class="sniper-radar" id="sniperRadar">
-            <div id="sniperMsg">رادار القناص: جاري التحليل...</div>
+            <span>الربح: <b id="profitText">0</b></span>
         </div>
 
         <div style="text-align: center;">
+            <span style="font-size: 12px; color: #94a3b8;">التوقع الذكي:</span>
             <span id="predict" class="prediction-text">---</span>
-            <div class="bet-display">الرهان: <span id="bet">10,000</span></div>
+            <div style="color: #f87171; font-weight: bold;">الرهان: <span id="bet">10,000</span></div>
         </div>
 
-        <div class="prob-container" id="probContainer"></div>
+        <div class="history-bar" id="historyBar">
+            <span style="color: #475569;">بانتظار إدخال النتائج...</span>
+        </div>
+
+        <div class="heatmap">
+            <div class="heat-bar"><div id="meatFill" class="heat-fill" style="background: #ef4444; width: 50%;"></div></div>
+            <div class="heat-bar"><div id="vegFill" class="heat-fill" style="background: #22c55e; width: 50%;"></div></div>
+        </div>
     </div>
 
     <div class="grid" id="buttons"></div>
 
     <div class="update-area">
-        <input type="number" id="newBalance" placeholder="الرصيد">
-        <input type="number" id="newGoal" placeholder="هدف الربح">
-        <button onclick="updateSettings()" style="background: #10b981; font-size: 12px; padding: 8px;">تحديث</button>
-        <button onclick="clearHistory()" style="background: #475569; font-size: 11px; padding: 8px;">تصفير</button>
+        <input type="number" id="inpBal" placeholder="الرصيد">
+        <input type="number" id="inpGoal" placeholder="الهدف">
+        <button onclick="saveSet()" style="background: #10b981; padding: 8px; font-size: 12px; flex: 1;">حفظ</button>
+        <button onclick="resetAll()" style="background: #475569; padding: 8px; font-size: 12px;">تصفير</button>
     </div>
 
     <script>
         const items = [
-            { name: "بيتزا", type: "meat", color: "#ef4444" }, { name: "لحم", type: "meat", color: "#b91c1c" },
-            { name: "دجاج", type: "meat", color: "#dc2626" }, { name: "مشويات", type: "meat", color: "#991b1b" },
-            { name: "هوت دوغ", type: "meat", color: "#7f1d1d" }, { name: "سلطة", type: "veg", color: "#22c55e" },
-            { name: "خس", type: "veg", color: "#16a34a" }, { name: "جزر", type: "veg", color: "#15803d" },
-            { name: "ذرة", type: "veg", color: "#166534" }, { name: "طماطم", type: "veg", color: "#14532d" }
+            {n: "بيتزا", t: "meat"}, {n: "لحم", t: "meat"}, {n: "دجاج", t: "meat"}, {n: "مشويات", t: "meat"}, {n: "هوت دوغ", t: "meat"},
+            {n: "سلطة", t: "veg"}, {n: "خس", t: "veg"}, {n: "جزر", t: "veg"}, {n: "ذرة", t: "veg"}, {n: "طماطم", t: "veg"}
         ];
 
-        let history = JSON.parse(localStorage.getItem('gameHistoryV6')) || [];
-        let balance = parseFloat(localStorage.getItem('gameBalanceV6')) || 0;
-        let startBalance = parseFloat(localStorage.getItem('startBalanceV6')) || balance;
-        let profitGoal = parseFloat(localStorage.getItem('profitGoalV6')) || 50000;
-        const MIN_BET = 10000;
+        let history = JSON.parse(localStorage.getItem('h_v6')) || [];
+        let balance = parseFloat(localStorage.getItem('b_v6')) || 0;
+        let startBal = parseFloat(localStorage.getItem('s_v6')) || balance;
+        let goal = parseFloat(localStorage.getItem('g_v6')) || 50000;
 
-        function updateUI() {
+        function refresh() {
+            // الرصيد والرهان
             document.getElementById('balance').innerText = Math.floor(balance).toLocaleString();
-            let calcBet = Math.floor(balance * 0.01);
-            document.getElementById('bet').innerText = Math.max(calcBet, MIN_BET).toLocaleString();
-            
-            // تحديث الأرباح والهدف (ميزة 1)
-            let profit = balance - startBalance;
-            document.getElementById('sessionProfit').innerText = (profit >= 0 ? "+" : "") + Math.floor(profit).toLocaleString();
-            document.getElementById('sessionProfit').style.color = profit >= 0 ? "#22c55e" : "#ef4444";
-            document.getElementById('targetGoal').innerText = profitGoal.toLocaleString();
-            
-            let progress = Math.min(Math.max((profit / profitGoal) * 100, 0), 100);
-            document.getElementById('currentProgress').innerText = Math.round(progress) + "%";
-            
-            if (profit >= profitGoal) {
-                document.getElementById('goalBox').classList.add('goal-achieved');
-                document.getElementById('sniperMsg').innerText = "🏆 تم تحقيق الهدف! اسحب أرباحك.";
-            } else {
-                document.getElementById('goalBox').classList.remove('goal-achieved');
-            }
+            let bValue = Math.max(Math.floor(balance * 0.01), 10000);
+            document.getElementById('bet').innerText = bValue.toLocaleString();
 
-            // ميزة 3: خريطة الحرارة
-            let meatCount = history.filter(n => items.find(i => i.name === n).type === 'meat').length;
-            let vegCount = history.filter(n => items.find(i => i.name === n).type === 'veg').length;
-            let totalHistory = history.length || 1;
-            document.getElementById('meatHeat').style.width = (meatCount / totalHistory * 100) + "%";
-            document.getElementById('vegHeat').style.width = (vegCount / totalHistory * 100) + "%";
+            // الأرباح والهدف
+            let p = balance - startBal;
+            document.getElementById('profitText').innerText = (p >= 0 ? "+" : "") + Math.floor(p).toLocaleString();
+            document.getElementById('profitText').style.color = p >= 0 ? "#22c55e" : "#ef4444";
+            document.getElementById('targetGoal').innerText = goal.toLocaleString();
+            let prog = Math.min(Math.max((p / goal) * 100, 0), 100);
+            document.getElementById('progressText').innerText = Math.round(prog) + "%";
+            if(p >= goal && goal > 0) document.getElementById('goalBox').classList.add('goal-achieved');
+            else document.getElementById('goalBox').classList.remove('goal-achieved');
 
-            // التوقعات
+            // السجل (History)
+            const bar = document.getElementById('historyBar');
+            bar.innerHTML = history.length ? history.slice().reverse().map(i => `<span class="history-item">${i}</span>`).join('') : "ابدأ اللعب...";
+
+            // خريطة الحرارة
+            let mC = history.filter(x => items.find(z => z.n === x).t === 'meat').length;
+            let vC = history.length - mC;
+            document.getElementById('meatFill').style.width = (history.length ? (mC/history.length)*100 : 50) + "%";
+            document.getElementById('vegFill').style.width = (history.length ? (vC/history.length)*100 : 50) + "%";
+
+            // التوقع (الأقل ظهوراً مع تجنب التكرار العبثي)
             let counts = {};
-            items.forEach(i => counts[i.name] = history.filter(h => h === i.name).length);
-            let sortedProbs = items.map(item => {
-                let weight = 100 - ((counts[item.name] / totalHistory) * 100);
-                return { ...item, weight: weight };
-            }).sort((a, b) => b.weight - a.weight);
+            items.forEach(it => counts[it.n] = history.filter(h => h === it.n).length);
+            // ترتيب عشوائي طفيف لكسر الجمود إذا كانت القيم متساوية
+            let sorted = [...items].sort((a,b) => (counts[a.n] || 0) - (counts[b.n] || 0) || Math.random() - 0.5);
+            document.getElementById('predict').innerText = sorted[0].n;
 
-            document.getElementById('predict').innerText = sortedProbs[0].name;
-            
-            // رادار القناص
-            if (history.length > 5) {
-                let last3 = history.slice(-3);
-                let types = last3.map(n => items.find(i => i.name === n).type);
-                if (types.every(t => t === types[0])) {
-                    document.getElementById('sniperMsg').innerText = "🛑 تنبيه: نمط تكرار فئة واحدة!";
-                    document.getElementById('sniperMsg').style.color = "#f87171";
-                } else {
-                    document.getElementById('sniperMsg').innerText = "🎯 الرادار: الحالة مستقرة";
-                    document.getElementById('sniperMsg').style.color = "#38bdf8";
-                }
-            }
-
-            // عرض النسب
-            document.getElementById('probContainer').innerHTML = sortedProbs.slice(0, 3).map(item => `
-                <div class="prob-item">
-                    <span style="width: 50px;">${item.name}</span>
-                    <div class="prob-bar-bg"><div class="prob-bar-fill" style="width: ${item.weight}%; background: ${item.color}"></div></div>
-                    <span>${Math.round(item.weight)}%</span>
-                </div>
-            `).join('');
-
-            localStorage.setItem('gameHistoryV6', JSON.stringify(history));
-            localStorage.setItem('gameBalanceV6', balance);
-            localStorage.setItem('startBalanceV6', startBalance);
-            localStorage.setItem('profitGoalV6', profitGoal);
+            localStorage.setItem('h_v6', JSON.stringify(history));
+            localStorage.setItem('b_v6', balance);
+            localStorage.setItem('s_v6', startBal);
+            localStorage.setItem('g_v6', goal);
         }
 
-        function updateSettings() {
-            let nb = document.getElementById('newBalance').value;
-            let ng = document.getElementById('newGoal').value;
-            if (nb) { balance = parseFloat(nb); startBalance = balance; }
-            if (ng) { profitGoal = parseFloat(ng); }
-            updateUI();
-            document.getElementById('newBalance').value = "";
-            document.getElementById('newGoal').value = "";
+        function saveSet() {
+            let nb = document.getElementById('inpBal').value;
+            let ng = document.getElementById('inpGoal').value;
+            if(nb) { balance = parseFloat(nb); startBal = balance; }
+            if(ng) goal = parseFloat(ng);
+            refresh();
+            document.getElementById('inpBal').value = ""; document.getElementById('inpGoal').value = "";
         }
 
-        function clearHistory() { if(confirm("تصفير الجلسة؟")) { history = []; startBalance = balance; updateUI(); } }
+        function resetAll() { if(confirm("تصفير؟")) { history=[]; startBal=balance; refresh(); } }
 
-        const btnContainer = document.getElementById('buttons');
+        const container = document.getElementById('buttons');
         items.forEach(item => {
-            let btn = document.createElement('button');
-            btn.innerText = item.name;
-            btn.className = item.type === "meat" ? "btn-meat" : "btn-veg";
-            btn.onclick = () => { history.push(item.name); if(history.length > 20) history.shift(); updateUI(); };
-            btnContainer.appendChild(btn);
+            let b = document.createElement('button');
+            b.innerText = item.n;
+            b.className = item.t === "meat" ? "btn-meat" : "btn-veg";
+            b.onclick = () => { history.push(item.n); if(history.length > 20) history.shift(); refresh(); };
+            container.appendChild(b);
         });
 
-        updateUI();
+        refresh();
     </script>
 </body>
 </html>
