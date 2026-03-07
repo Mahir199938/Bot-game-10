@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوت 10K المطور</title>
+    <style>
+        body { font-family: sans-serif; background-color: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; }
+        .scorecard { background: #1e293b; border: 2px solid #38bdf8; border-radius: 12px; padding: 15px; width: 95%; max-width: 380px; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
+        .prediction-box { text-align: center; padding-top: 5px; }
+        .prediction-text { color: #fbbf24; font-size: 28px; font-weight: bold; display: block; }
+        .bet-alert { color: #f87171; font-weight: bold; font-size: 20px; border: 1px dashed #f87171; padding: 2px 10px; border-radius: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 95%; max-width: 380px; margin-top: 20px; }
+        button { background: #334155; color: white; border: 1px solid #475569; padding: 18px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button:active { background: #38bdf8; transform: scale(0.95); }
+        .update-area { margin-top: 20px; background: #1e293b; padding: 10px; border-radius: 10px; width: 95%; max-width: 380px; display: flex; justify-content: space-around; }
+        input { padding: 10px; border-radius: 5px; border: 1px solid #38bdf8; background: #0f172a; color: white; width: 60%; }
+    </style>
+</head>
+<body>
+
+    <div class="scorecard">
+        <div class="stats-row">
+            <span>الرصيد: <b id="balance">412,790</b></span>
+        </div>
+        <div class="prediction-box">
+            <span>التوقع القادم</span>
+            <span id="predict" class="prediction-text">---</span>
+            <div style="margin-top: 10px;">الرهان: <span id="bet" class="bet-alert">10,000</span></div>
+        </div>
+        <div style="font-size: 11px; color: #10b981; margin-top: 12px; text-align: center;">✅ الجلسة محفوظة تلقائياً</div>
+    </div>
+
+    <div class="grid" id="buttons"></div>
+
+    <div class="update-area">
+        <input type="number" id="newBalance" placeholder="الرصيد الجديد">
+        <button onclick="updateBalance()" style="padding: 8px; background: #10b981; font-size: 14px; border: none;">تحديث</button>
+    </div>
+
+    <script>
+        let items = ["طماطم", "ذرة", "جزر", "خس", "هوت دوغ", "مشويات", "دجاج", "لحم"];
+        let history = JSON.parse(localStorage.getItem('gameHistory10k')) || [];
+        let balance = localStorage.getItem('gameBalance10k') || 412790;
+        const MIN_BET = 10000;
+
+        function updateUI() {
+            document.getElementById('balance').innerText = Number(balance).toLocaleString();
+            let calcBet = Math.floor(balance * 0.01);
+            document.getElementById('bet').innerText = Math.max(calcBet, MIN_BET).toLocaleString();
+            
+            let counts = {};
+            items.forEach(i => counts[i] = history.filter(h => h === i).length);
+            document.getElementById('predict').innerText = items.reduce((a, b) => (counts[a] || 0) <= (counts[b] || 0) ? a : b);
+            
+            localStorage.setItem('gameHistory10k', JSON.stringify(history));
+            localStorage.setItem('gameBalance10k', balance);
+        }
+
+        function updateBalance() {
+            let val = document.getElementById('newBalance').value;
+            if(val) { balance = val; updateUI(); document.getElementById('newBalance').value = ""; }
+        }
+
+        const btnContainer = document.getElementById('buttons');
+        items.forEach(item => {
+            let btn = document.createElement('button');
+            btn.innerText = item;
+            btn.onclick = () => { history.push(item); if(history.length > 25) history.shift(); updateUI(); };
+            btnContainer.appendChild(btn);
+        });
+        updateUI();
+    </script>
+</body>
+</html>
