@@ -3,25 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوت فواكه الذكي V13 - نظام الكومبو</title>
+    <title>بوت قناص الفواكه V15 - نظام الحماية</title>
     <style>
-        :root { --neon: #a855f7; --bg: #020617; --card: #1e1b4b; --gold: #fbbf24; --danger: #ef4444; --success: #4ade80; }
+        :root { --neon: #a855f7; --bg: #020617; --card: #1e1b4b; --gold: #fbbf24; --danger: #ef4444; --success: #4ade80; --warning: #f59e0b; }
         body { font-family: sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         
         .scorecard { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 12px; width: 95%; max-width: 440px; box-shadow: 0 0 30px rgba(168,85,247,0.3); }
         
         .goal-status { background: rgba(74, 222, 128, 0.1); border: 1px dashed var(--success); border-radius: 10px; padding: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 11px; }
-        .goal-met { background: var(--gold) !important; color: black !important; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        .goal-met { background: var(--gold) !important; color: black !important; font-weight: bold; }
+
+        /* نظام إدارة المخاطر */
+        .risk-shield { padding: 8px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: none; transition: 0.3s; }
+        .risk-warn { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--warning); color: var(--warning); display: block; }
+        .risk-stop { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: var(--danger); display: block; }
 
         .jackpot-radar { background: rgba(251, 191, 36, 0.1); border: 2px double var(--gold); border-radius: 12px; padding: 8px; margin-bottom: 10px; text-align: center; }
-        .jackpot-val { font-size: 24px; font-weight: bold; color: var(--gold); display: block; }
-
-        /* ميزة الكومبو: إضاءة العناصر المقترنة */
-        .combo-alert { background: rgba(168, 85, 247, 0.2); border: 1px solid var(--neon); border-radius: 8px; padding: 5px; margin-bottom: 8px; text-align: center; font-size: 11px; color: #e9d5ff; display: none; }
+        .jack-status { font-size: 20px; font-weight: bold; color: white; display: block; }
 
         .quad-predictions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
-        .pred-item { text-align: center; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid #4338ca; }
+        .pred-item { text-align: center; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid #4338ca; transition: 0.3s; }
+        /* تمييز التوقع المزدوج */
+        .double-down { border: 2px solid var(--gold) !important; box-shadow: 0 0 10px var(--gold); transform: scale(1.02); }
         .name { font-size: 16px; font-weight: bold; color: #f472b6; }
         .stars { color: var(--gold); font-size: 9px; }
 
@@ -30,11 +33,11 @@
         .history-bar { background: #020617; border-radius: 8px; padding: 8px; margin: 10px 0; display: flex; gap: 6px; overflow-x: auto; min-height: 25px; }
         .h-item { font-size: 10px; padding: 3px 10px; background: #312e81; border-radius: 5px; white-space: nowrap; }
 
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 95%; max-width: 440px; margin-top: 12px; }
-        button { color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-fruit { background: #312e81; border-bottom: 4px solid #1e1b4b; }
-        .btn-jack { background: #701a75; border: 2px solid var(--gold); }
-        .combo-highlight { box-shadow: 0 0 15px var(--neon); border: 2px solid #fff !important; transform: scale(1.05); }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 95%; max-width: 440px; margin-top: 12px; }
+        button { color: white; border: none; padding: 12px 5px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-fruit { background: #312e81; border-bottom: 3px solid #1e1b4b; }
+        .btn-jack { background: linear-gradient(to bottom, #b45309, #78350f); border: 2px solid var(--gold); grid-column: span 3; margin-top: 5px; font-size: 18px; }
+        .combo-highlight { box-shadow: 0 0 15px var(--neon); border: 2px solid #fff !important; }
 
         .controls { margin-top: 15px; display: flex; gap: 5px; width: 95%; max-width: 440px; flex-wrap: wrap; }
         input { background: #020617; border: 1px solid var(--neon); color: white; padding: 10px; border-radius: 8px; flex: 1; font-size: 12px; min-width: 120px; }
@@ -48,16 +51,16 @@
             <span id="goalPercent">التقدم: 0%</span>
         </div>
 
+        <div id="riskShield" class="risk-shield"></div>
+
         <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
-            <span>الرصيد: <b id="bal">0</b></span>
+            <span>الرصيد: <b id="bal" style="color: var(--success);">0</b></span>
             <span>الربح: <b id="prof">0</b></span>
         </div>
 
-        <div class="combo-alert" id="comboBox">✨ ملاحظة نمط: <span id="comboText"></span> قادم غالباً!</div>
-
         <div class="jackpot-radar">
-            <span style="font-size: 10px; color: var(--gold);">🎰 رادار الجاكبوت (40x / 20x)</span>
-            <span id="jackPredict" class="jackpot-val">---</span>
+            <span style="font-size: 10px; color: var(--gold);">🎰 رادار الجاكبوت الحقيقي</span>
+            <span id="jackStatus" class="jack-status">تحليل...</span>
         </div>
 
         <div class="quad-predictions" id="quadBox"></div>
@@ -75,23 +78,23 @@
     <div class="controls">
         <input type="number" id="inB" placeholder="الرصيد">
         <input type="number" id="inG" placeholder="هدف الربح">
-        <button onclick="set()" style="background: #a855f7; padding: 8px; font-size: 12px; flex: 1;">حفظ</button>
-        <button onclick="reset()" style="background: #475569; padding: 8px; font-size: 12px;">تصفير</button>
+        <button onclick="set()" style="background: #a855f7; padding: 10px; font-size: 12px; flex: 1;">حفظ</button>
+        <button onclick="reset()" style="background: #475569; padding: 10px; font-size: 12px;">تصفير</button>
     </div>
 
     <script>
         const fruits = [
-            {n: "كرز", x: 40, t: "j"}, {n: "بطيخ", x: 20, t: "j"},
-            {n: "موز", x: 10, t: "r"}, {n: "فراولة", x: 10, t: "r"},
-            {n: "ليمون", x: 5, t: "r"}, {n: "توت", x: 5, t: "r"},
-            {n: "كيوي", x: 5, t: "r"}, {n: "عنب", x: 5, t: "r"}
+            {n: "كرز", x: 40}, {n: "بطيخ", x: 20}, {n: "موز", x: 10}, 
+            {n: "فراولة", x: 10}, {n: "ليمون", x: 5}, {n: "توت", x: 5}, 
+            {n: "كيوي", x: 5}, {n: "عنب", x: 5}
         ];
 
-        let hist = JSON.parse(localStorage.getItem('h13')) || [];
-        let bal = parseFloat(localStorage.getItem('b13')) || 0;
-        let startB = parseFloat(localStorage.getItem('s13')) || bal;
-        let goalAmount = parseFloat(localStorage.getItem('g13')) || 0;
+        let hist = JSON.parse(localStorage.getItem('h15')) || [];
+        let bal = parseFloat(localStorage.getItem('b15')) || 0;
+        let startB = parseFloat(localStorage.getItem('s15')) || bal;
+        let goalAmount = parseFloat(localStorage.getItem('g15')) || 0;
         let multiply = 1;
+        let lossStreak = 0; // متتبع الخسارات المتتالية
 
         function update() {
             document.getElementById('bal').innerText = Math.floor(bal).toLocaleString();
@@ -101,104 +104,104 @@
             
             document.getElementById('goalValDisplay').innerText = goalAmount.toLocaleString();
             if (goalAmount > 0) {
-                let progress = Math.min((profit / goalAmount) * 100, 100);
+                let progress = Math.max(0, Math.min((profit / goalAmount) * 100, 100));
                 document.getElementById('goalPercent').innerText = "التقدم: " + Math.round(progress) + "%";
-                if (profit >= goalAmount) document.getElementById('goalBar').classList.add('goal-met');
+                if (profit >= goalAmount) {
+                    document.getElementById('goalBar').classList.add('goal-met');
+                    document.getElementById('goalBar').innerText = "🏆 الهدف تم! اسحب الآن";
+                }
             }
 
             let baseBet = Math.max(Math.floor(bal * 0.01), 10000);
             document.getElementById('bt').innerText = (baseBet * multiply).toLocaleString();
-
             document.getElementById('hBar').innerHTML = hist.slice().reverse().map(i => `<span class="h-item">${i}</span>`).join('');
 
-            calculateV13();
-            localStorage.setItem('h13', JSON.stringify(hist));
-            localStorage.setItem('b13', bal);
-            localStorage.setItem('s13', startB);
-            localStorage.setItem('g13', goalAmount);
+            checkRisk();
+            calculateV15();
+            save();
         }
 
-        function calculateV13() {
-            // 1. الجاكبوت
-            let jacks = fruits.filter(f => f.t === "j").map(f => {
-                let last = hist.lastIndexOf(f.n);
-                return { n: f.n, g: last===-1 ? 40 : hist.length-1-last, x: f.x };
-            }).sort((a,b)=>b.g-a.g);
-            document.getElementById('jackPredict').innerText = jacks[0].n + " (" + jacks[0].x + "x)";
+        function checkRisk() {
+            let shield = document.getElementById('riskShield');
+            if (lossStreak >= 5) {
+                shield.className = "risk-shield risk-stop";
+                shield.innerText = "🛑 تنبيه خطر: 5 خسارات متتالية! توقف قليلاً.";
+            } else if (lossStreak >= 3) {
+                shield.className = "risk-shield risk-warn";
+                shield.innerText = "⚠️ تحذير: 3 خسارات متتالية. خفف الرهان.";
+            } else {
+                shield.style.display = "none";
+                return;
+            }
+            shield.style.display = "block";
+        }
 
-            // 2. التوقعات الأربعة
-            let regular = fruits.filter(f => f.t === "r").map(f => {
+        function calculateV15() {
+            let lastJack = hist.lastIndexOf("جاكبوت");
+            let jackGap = lastJack === -1 ? hist.length : hist.length - 1 - lastJack;
+            document.getElementById('jackStatus').innerText = jackGap > 20 ? "🔥 فرصة عالية" : "انتظار...";
+
+            let scores = fruits.map(f => {
                 let count = hist.filter(h => h === f.n).length;
                 let last = hist.lastIndexOf(f.n);
-                let gap = last===-1 ? 20 : hist.length-1-last;
-                let weight = (gap * 8) + ((hist.length - count) * 4);
-                if(hist.slice(-1).includes(f.n)) weight -= 80;
+                let gap = last === -1 ? 25 : hist.length - 1 - last;
+                let weight = (gap * 8) + ((hist.length - count) * 4) + (f.x / 2);
+                if(hist.slice(-1).includes(f.n)) weight -= 100;
                 return { n: f.n, s: weight, gap: gap, x: f.x };
-            }).sort((a,b)=>b.s-a.s);
+            }).sort((a,b) => b.s - a.s);
 
-            document.getElementById('quadBox').innerHTML = regular.slice(0, 4).map((s, i) => {
+            document.getElementById('quadBox').innerHTML = scores.slice(0, 4).map((s, i) => {
+                // ميزة التوقع المزدوج: تمييز أول خيارين
+                let isDouble = i < 2; 
                 let stars = s.gap > 12 ? "⭐⭐⭐" : (s.gap > 6 ? "⭐⭐" : "⭐");
-                return `<div class="pred-item" id="pred-${s.n}"><span style="font-size:10px;color:#818cf8">${s.x}x</span><div class="name">${s.n}</div><span class="stars">${stars}</span></div>`;
+                return `<div class="pred-item ${isDouble?'double-down':''}"><span style="font-size:10px;color:#818cf8">${s.x}x</span><div class="name">${s.n}</div><span class="stars">${stars}</span></div>`;
             }).join('');
-
-            // 3. ميزة الكومبو (رصد النمط)
-            analyzeCombo();
         }
 
-        function analyzeCombo() {
-            if (hist.length < 2) return;
-            let lastFruit = hist[hist.length - 1];
-            let pairs = {};
-            
-            // فحص التاريخ لرصد أي فاكهة تظهر عادة بعد الفاكهة الأخيرة
-            for (let i = 0; i < hist.length - 1; i++) {
-                if (hist[i] === lastFruit) {
-                    let next = hist[i+1];
-                    pairs[next] = (pairs[next] || 0) + 1;
-                }
-            }
-
-            let bestNext = Object.keys(pairs).reduce((a, b) => pairs[a] > pairs[b] ? a : b, null);
-            
-            // إزالة التمييز السابق
-            document.querySelectorAll('.grid button').forEach(b => b.classList.remove('combo-highlight'));
-            
-            if (bestNext && pairs[bestNext] > 1) {
-                document.getElementById('comboText').innerText = bestNext;
-                document.getElementById('comboBox').style.display = "block";
-                // تمييز الزر في الشبكة
-                let btn = Array.from(document.querySelectorAll('.grid button')).find(b => b.innerText.includes(bestNext));
-                if (btn) btn.classList.add('combo-highlight');
-            } else {
-                document.getElementById('comboBox').style.display = "none";
-            }
+        function triggerLoss() { 
+            multiply *= 2.2; 
+            lossStreak++; 
+            if(multiply > 30) multiply = 1; 
+            update(); 
         }
-
-        function triggerLoss() { multiply *= 2.2; if(multiply > 20) multiply = 1; update(); }
 
         function set() {
             let b = document.getElementById('inB').value;
             let g = document.getElementById('inG').value;
-            if(b) { bal = parseFloat(b); startB = bal; multiply = 1; }
+            if(b) { bal = parseFloat(b); startB = bal; multiply = 1; lossStreak = 0; }
             if(g) goalAmount = parseFloat(g);
             update();
         }
 
-        function reset() { if(confirm("تصفير؟")) { hist=[]; multiply=1; update(); location.reload(); } }
+        function reset() { if(confirm("تصفير؟")) { hist=[]; multiply=1; lossStreak=0; localStorage.clear(); location.reload(); } }
+        function save() {
+            localStorage.setItem('h15', JSON.stringify(hist));
+            localStorage.setItem('b15', bal);
+            localStorage.setItem('s15', startB);
+            localStorage.setItem('g15', goalAmount);
+        }
 
         const grid = document.getElementById('btns');
         fruits.forEach(f => {
             let b = document.createElement('button');
             b.innerText = f.n + " (" + f.x + "x)";
-            b.className = f.t === "j" ? "btn-jack" : "btn-fruit";
+            b.className = "btn-fruit";
             b.onclick = () => { 
                 hist.push(f.n); 
-                if(hist.length > 50) hist.shift(); // زدت السجل لـ 50 لتحسين دقة الكومبو
-                multiply = 1;
+                if(hist.length > 60) hist.shift(); 
+                multiply = 1; 
+                lossStreak = 0; // تصفير سلسلة الخسارة عند الفوز
                 update(); 
             };
             grid.appendChild(b);
         });
+        
+        let jBtn = document.createElement('button');
+        jBtn.innerText = "🎰 جـاكـبـوت (JACKPOT)";
+        jBtn.className = "btn-jack";
+        jBtn.onclick = () => { hist.push("جاكبوت"); multiply = 1; lossStreak = 0; update(); };
+        grid.appendChild(jBtn);
+
         update();
     </script>
 </body>
