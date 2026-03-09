@@ -3,122 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوت صائد الصناديق V25 - Crazy Box</title>
+    <title>بوت Crazy Box V26 - الذكاء الديناميكي</title>
     <style>
-        :root { --gold: #fbbf24; --bg: #0f172a; --card: #1e293b; --neon: #38bdf8; }
+        :root { --gold: #fbbf24; --bg: #020617; --card: #1e293b; --neon: #22d3ee; --danger: #f87171; }
         body { font-family: sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        .main-card { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 15px; width: 95%; max-width: 440px; box-shadow: 0 0 25px rgba(34,211,238,0.2); }
+        .prediction-area { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        .pred-box { background: rgba(0,0,0,0.4); border: 1px solid #334155; border-radius: 10px; padding: 15px; text-align: center; position: relative; overflow: hidden; }
+        .pred-box.primary { border-color: var(--gold); background: rgba(251,191,36,0.1); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251,191,36,0.4); } 70% { box-shadow: 0 0 0 10px rgba(251,191,36,0); } 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); } }
         
-        .main-card { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 15px; width: 95%; max-width: 440px; box-shadow: 0 0 20px rgba(56,189,248,0.2); }
-        .header { text-align: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px; }
-        
-        .prediction-area { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        .pred-box { background: rgba(0,0,0,0.3); border: 1px solid #334155; border-radius: 10px; padding: 12px; text-align: center; transition: 0.3s; }
-        .pred-box.hot { border-color: var(--gold); background: rgba(251,191,36,0.1); }
-        
-        .box-num { font-size: 20px; font-weight: bold; color: var(--gold); }
-        .box-info { font-size: 11px; color: #94a3b8; }
-
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 95%; max-width: 440px; margin-top: 20px; }
-        button { padding: 15px 5px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; background: #334155; color: white; font-size: 14px; }
-        button:active { transform: scale(0.95); }
-        .btn-active { background: var(--neon); color: var(--bg); }
-
-        .history { display: flex; gap: 5px; overflow-x: auto; padding: 10px; width: 95%; max-width: 440px; margin-top: 15px; background: #000; border-radius: 8px; min-height: 40px; }
-        .h-item { min-width: 30px; height: 30px; background: #334155; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-        .h-last { background: var(--gold); color: black; font-weight: bold; }
+        .box-num { font-size: 24px; font-weight: bold; color: var(--gold); }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 95%; max-width: 440px; margin-top: 20px; }
+        button { padding: 18px 5px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; background: #334155; color: white; transition: 0.2s; }
+        button:active { background: var(--neon); color: black; }
+        .history { display: flex; gap: 6px; overflow-x: auto; padding: 10px; width: 95%; max-width: 440px; margin-top: 15px; background: #000; border-radius: 8px; min-height: 45px; border: 1px solid #1e293b; }
+        .h-item { min-width: 35px; height: 35px; background: #334155; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
+        .h-last { border: 2px solid var(--neon); color: var(--neon); }
     </style>
 </head>
 <body>
 
     <div class="main-card">
-        <div class="header">
-            <h3 style="margin:0; color:var(--neon)">رادار Crazy Box V25</h3>
-            <span id="status" style="font-size:11px; color:var(--gold)">أدخل 5 نتائج لتحليل النمط...</span>
+        <div style="text-align:center; margin-bottom:10px;">
+            <h3 style="margin:0; color:var(--neon)">V26 DYNAMIC ANALYZER</h3>
+            <div id="mood" style="font-size:10px; color:var(--gold)">جاري قراءة "مزاج" الغرفة...</div>
         </div>
 
         <div class="prediction-area" id="predictionArea">
             </div>
 
-        <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:12px; text-align:center;">
-            الرهان الموصى به: <b style="color:var(--gold)">10,000 لكل صندوق</b>
+        <div id="smartAlert" style="font-size:11px; text-align:center; padding:8px; background:rgba(255,255,255,0.05); border-radius:5px;">
+            بانتظار البيانات...
         </div>
     </div>
 
     <div class="history" id="historyBar"></div>
 
     <div class="btn-grid">
-        <button onclick="addResult(1)">1</button>
-        <button onclick="addResult(2)">2</button>
-        <button onclick="addResult(3)">3</button>
-        <button onclick="addResult(4)">4</button>
-        <button onclick="addResult(5)">5</button>
-        <button onclick="addResult(6)">6</button>
-        <button onclick="addResult(7)">7</button>
-        <button onclick="addResult(8)">8</button>
+        <button onclick="inputResult(1)">1</button>
+        <button onclick="inputResult(2)">2</button>
+        <button onclick="inputResult(3)">3</button>
+        <button onclick="inputResult(4)">4</button>
+        <button onclick="inputResult(5)">5</button>
+        <button onclick="inputResult(6)">6</button>
+        <button onclick="inputResult(7)">7</button>
+        <button onclick="inputResult(8)">8</button>
     </div>
 
     <script>
-        const boxData = [
-            {id:1, mul:5}, {id:2, mul:5}, {id:3, mul:5}, {id:4, mul:8},
-            {id:5, mul:10}, {id:6, mul:12}, {id:7, mul:15}, {id:8, mul:25}
+        let history = JSON.parse(localStorage.getItem('cb_v26')) || [];
+        const boxes = [
+            {id:1, x:5}, {id:2, x:5}, {id:3, x:5}, {id:4, x:8},
+            {id:5, x:10}, {id:6, x:12}, {id:7, x:15}, {id:8, x:25}
         ];
-        
-        let history = JSON.parse(localStorage.getItem('cb_hist')) || [];
 
-        function addResult(n) {
+        function inputResult(n) {
             history.push(n);
-            if(history.length > 50) history.shift();
-            localStorage.setItem('cb_hist', JSON.stringify(history));
-            updateUI();
+            if(history.length > 40) history.shift();
+            localStorage.setItem('cb_v26', JSON.stringify(history));
+            update();
         }
 
-        function updateUI() {
+        function update() {
             const hBar = document.getElementById('historyBar');
             hBar.innerHTML = history.slice().reverse().map((n, i) => 
                 `<div class="h-item ${i===0?'h-last':''}">${n}</div>`
             ).join('');
 
-            const status = document.getElementById('status');
-            if(history.length < 5) {
-                status.innerText = `مطلوب بيانات إضافية: ${history.length} / 5`;
-                return;
-            }
-            status.innerText = "✅ النمط مكتشف - توقعات دقيقة";
+            if(history.length < 5) return;
             calculate();
         }
 
         function calculate() {
             const area = document.getElementById('predictionArea');
+            const alert = document.getElementById('smartAlert');
+            const mood = document.getElementById('mood');
+            
             let last = history[history.length - 1];
+            let last3 = history.slice(-3);
+            
+            // تحليل "المزاج"
+            let smallCount = last3.filter(x => x <= 3).length;
+            if(smallCount >= 3) mood.innerText = "⚠️ الخوارزمية في وضع 'توفير' - توقع انفجار متوسط قريباً";
+            else mood.innerText = "✅ الخوارزمية في وضع 'توزيع' متوازن";
 
-            let scores = boxData.map(box => {
-                let lastSeen = history.lastIndexOf(box.id);
-                let gap = lastSeen === -1 ? 20 : (history.length - 1 - lastSeen);
+            let scores = boxes.map(b => {
+                let lastSeen = history.lastIndexOf(b.id);
+                let gap = lastSeen === -1 ? 15 : (history.length - 1 - lastSeen);
                 
-                // الخوارزمية المعتمدة على صورك:
-                let s = gap * 12; // كل ما زاد الغياب زاد الاحتمال
-                
-                // منع التكرار المباشر (نادر جداً في Crazy Box)
-                if(box.id === last) s -= 200;
-                
-                // نمط "الدرج": إذا طلع 1، فالاحتمال القادم لـ 2 و 3 أعلى
-                if(Math.abs(box.id - last) <= 2 && box.id !== last) s += 50;
+                // الوزن الأساسي
+                let s = gap * 15;
 
-                return { ...box, score: s, gap: gap };
+                // منع التعليق القاتل: إذا غاب الصندوق أكثر من 15 جولة، لا تعطِه الأولوية القصوى فوراً
+                if(gap > 15) s *= 0.7; 
+
+                // قاعدة "القفز": إذا طلع 1، فالأقرب هو 3 أو 4 (وليس 2 دائماً)
+                if(Math.abs(b.id - last) === 2) s += 60;
+                
+                // تجنب التكرار المباشر
+                if(b.id === last) s = -500;
+
+                // تعزيز الأرقام المتوسطة إذا تكررت الصغيرة
+                if(smallCount >= 3 && b.id >= 4 && b.id <= 6) s += 100;
+
+                return { ...b, score: s, gap: gap };
             }).sort((a,b) => b.score - a.score);
 
             let top4 = scores.slice(0, 4);
 
             area.innerHTML = top4.map((p, i) => `
-                <div class="pred-box ${i<2?'hot':''}">
-                    <div class="box-num">صندوق ${p.id}</div>
-                    <div class="box-info">${p.mul}x | غائب ${p.gap}</div>
-                    <div style="font-size:9px; color:var(--neon)">${i<2?'أولوية':'تأمين'}</div>
+                <div class="pred-box ${i<2?'primary':''}">
+                    <div class="box-num">${p.id}</div>
+                    <div style="font-size:10px; color:#94a3b8">${p.x}x | غائب ${p.gap}</div>
+                    <div style="font-size:9px; margin-top:4px; color:var(--neon)">${i<2?'أولوية قصوى':'تأمين ذكي'}</div>
                 </div>
             `).join('');
-        }
 
-        updateUI();
+            alert.innerHTML = `توقع الجولة القادمة: ركز على <b style="color:var(--gold)">${top4[0].id}</b> و <b style="color:var(--gold)">${top4[1].id}</b>`;
+        }
+        update();
     </script>
 </body>
 </html>
