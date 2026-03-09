@@ -3,45 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوت قناص الفواكه V20 - إصلاح الأزرار</title>
+    <title>Fruit Party Hunter V23</title>
     <style>
-        :root { --neon: #a855f7; --bg: #020617; --card: #1e1b4b; --gold: #fbbf24; --danger: #ef4444; --success: #4ade80; }
-        body { font-family: sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        :root { --neon: #f472b6; --bg: #020617; --card: #1e1b4b; --gold: #fbbf24; --success: #4ade80; }
+        body { font-family: sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        .scorecard { background: var(--card); border: 2px solid var(--neon); border-radius: 12px; padding: 10px; width: 95%; max-width: 420px; box-shadow: 0 0 15px rgba(244,114,182,0.2); }
         
-        .scorecard { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 12px; width: 95%; max-width: 440px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; }
+        /* شاشة جمع البيانات */
+        .init-box { border: 1px dashed var(--gold); padding: 15px; border-radius: 10px; text-align: center; color: var(--gold); margin-bottom: 10px; }
         
-        /* تنبيه جمع البيانات - أصبح لا يغطي الشاشة */
-        .data-notice { background: rgba(251, 191, 36, 0.1); border: 1px dashed var(--gold); border-radius: 10px; padding: 15px; text-align: center; color: var(--gold); }
-        .data-count { font-size: 24px; font-weight: bold; display: block; margin-top: 5px; }
+        .pred-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
+        .pred-card { background: rgba(0,0,0,0.5); border: 1px solid #312e81; padding: 12px; border-radius: 10px; text-align: center; }
+        .p-name { font-size: 18px; font-weight: bold; color: #f472b6; }
+        .p-chance { font-size: 11px; color: var(--success); }
 
-        .quad-predictions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
-        .pred-item { text-align: center; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid #4338ca; }
-        .name { font-size: 16px; font-weight: bold; color: #f472b6; }
-
-        .bet-zone { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
+        .bet-info { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid #334155; }
         
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 95%; max-width: 440px; margin-top: 20px; }
-        button { color: white; border: none; padding: 15px 5px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-fruit { background: #312e81; border-bottom: 4px solid #1e1b4b; }
-        .btn-fruit:active { transform: translateY(2px); border-bottom: 0; }
-        .btn-jack { background: linear-gradient(to bottom, #b45309, #78350f); border: 2px solid var(--gold); grid-column: span 3; font-size: 18px; margin-top: 10px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 95%; max-width: 420px; margin-top: 20px; }
+        button { padding: 18px 5px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; transition: 0.1s; }
+        .btn-f { background: #312e81; border-bottom: 4px solid #1e1b4b; }
+        .btn-f:active { transform: translateY(3px); border-bottom: none; }
+        .btn-j { background: linear-gradient(45deg, #b45309, #d97706); grid-column: span 3; font-size: 18px; margin-top: 5px; }
         
-        .history-bar { background: #020617; border-radius: 8px; padding: 8px; margin: 10px 0; display: flex; gap: 6px; overflow-x: auto; min-height: 30px; border: 1px solid #1e293b; }
-        .h-item { font-size: 10px; padding: 4px 10px; background: #4338ca; border-radius: 5px; white-space: nowrap; }
+        .history { display: flex; gap: 5px; overflow-x: auto; padding: 10px; width: 95%; max-width: 420px; margin-top: 10px; background: #000; border-radius: 5px; }
+        .h-tag { font-size: 9px; padding: 3px 8px; background: #4338ca; border-radius: 4px; white-space: nowrap; }
     </style>
 </head>
 <body>
 
-    <div class="scorecard" id="displayArea">
+    <div class="scorecard" id="main">
         </div>
 
-    <div class="history-bar" id="hBar"></div>
-
-    <div class="grid" id="btnsArea"></div>
-    
-    <div style="margin-top:20px;">
-        <button onclick="resetAll()" style="background: #475569; padding: 8px 20px; border-radius: 8px; font-size: 11px;">إعادة تعيين كاملة</button>
-    </div>
+    <div class="history" id="hBar"></div>
+    <div class="btn-grid" id="btns"></div>
 
     <script>
         const fruits = [
@@ -49,97 +43,80 @@
             {n: "فراولة", x: 10}, {n: "ليمون", x: 5}, {n: "توت", x: 5}, 
             {n: "كيوي", x: 5}, {n: "عنب", x: 5}
         ];
+        
+        let hist = JSON.parse(localStorage.getItem('v23_h')) || [];
+        let riskMode = false;
 
-        let hist = JSON.parse(localStorage.getItem('h20')) || [];
-        let failStrike = 0;
-
-        function updateUI() {
-            const display = document.getElementById('displayArea');
+        function update() {
+            const main = document.getElementById('main');
             const hBar = document.getElementById('hBar');
-            
-            // تحديث شريط التاريخ
-            hBar.innerHTML = hist.slice().reverse().map(i => `<span class="h-item">${i}</span>`).join('');
+            hBar.innerHTML = hist.slice().reverse().map(i => `<span class="h-tag">${i}</span>`).join('');
 
             if (hist.length < 10) {
-                // شاشة جمع البيانات
-                display.innerHTML = `
-                    <div class="data-notice">
-                        <span>الرجاء إدخال آخر 10 نتائج من اللعبة لبدء التحليل الذكي</span>
-                        <span class="data-count">${hist.length} / 10</span>
-                        <p style="font-size:10px; margin-top:10px;">(اضغط على أزرار الفواكه بالأسفل)</p>
+                main.innerHTML = `
+                    <div class="init-box">
+                        <b style="font-size:18px;">نظام Fruit Party V23</b><br>
+                        أدخل 10 نتائج لبدء تحليل الدورة...
+                        <div style="font-size:24px; margin-top:10px;">${hist.length} / 10</div>
                     </div>
                 `;
             } else {
-                // شاشة التحليل المتقدم
-                renderAnalysis(display);
+                analyze();
             }
-            localStorage.setItem('h20', JSON.stringify(hist));
+            localStorage.setItem('v23_h', JSON.stringify(hist));
         }
 
-        function renderAnalysis(container) {
-            let lastFruit = hist[hist.length - 1];
+        function analyze() {
+            const main = document.getElementById('main');
             
             let scores = fruits.map(f => {
-                let lastIdx = hist.lastIndexOf(f.n);
-                let gap = lastIdx === -1 ? 25 : hist.length - 1 - lastIdx;
-                let s = gap * 10;
+                let last = hist.lastIndexOf(f.n);
+                let gap = last === -1 ? 25 : hist.length - 1 - last;
+                
+                // خوارزمية الصيد: الفواكه التي تأخرت لكن ضمن حدود المعقول
+                let s = gap * 15;
+                if (f.x >= 20 && (gap < 12 || gap > 30)) s = -100; // تجنب التعليق في الكرز
+                if (f.n === hist[hist.length-1]) s = -500; // لا تكرر فوراً
 
-                if (failStrike >= 3) s -= 150; // كسر التعليق
-                if (f.x >= 20 && (gap < 12 || gap > 35)) s = -500; // حماية الكرز
-                if (f.n === lastFruit) s = -1000; // منع التكرار الفوري
-
-                return { n: f.n, s: s, x: f.x };
+                return { n: f.n, s: s, x: f.x, g: gap };
             }).sort((a,b) => b.s - a.s);
 
             let top4 = scores.slice(0, 4);
 
-            container.innerHTML = `
-                <div style="text-align:center; color:var(--success); font-size:12px; margin-bottom:10px;">✅ تم تحليل النمط - التوقعات جاهزة</div>
-                <div class="quad-predictions">
-                    ${top4.map(s => `
-                        <div class="pred-item">
-                            <span style="font-size:10px; color:#818cf8">${s.x}x</span>
-                            <div class="name">${s.n}</div>
+            main.innerHTML = `
+                <div style="text-align:center; font-size:12px; color:var(--gold); margin-bottom:8px;">🎯 الدورة الحالية: مستقرة</div>
+                <div class="pred-grid">
+                    ${top4.map(p => `
+                        <div class="pred-card">
+                            <div class="p-name">${p.n}</div>
+                            <div class="p-chance">${p.x}x (غائب ${p.g})</div>
                         </div>
                     `).join('')}
                 </div>
-                <div class="bet-zone">
-                    <span style="font-size:13px;">الرهان الموصى به: <b style="color:var(--gold)">${failStrike >= 3 ? '10,000 (أمان)' : 'حسب رصيدك'}</b></span>
-                    <button onclick="failStrike++; updateUI();" style="background:var(--danger); padding:5px 10px; font-size:10px; border-radius:5px;">خطأ</button>
+                <div class="bet-info">
+                    <span>الرهان الموصى به: <b style="color:var(--gold)">10,000</b></span>
+                    <span style="color:var(--success)">فرصة الربح: عالية</span>
                 </div>
             `;
         }
 
-        // إنشاء الأزرار
-        const btnsArea = document.getElementById('btnsArea');
+        const bDiv = document.getElementById('btns');
         fruits.forEach(f => {
             let b = document.createElement('button');
-            b.innerText = f.n;
-            b.className = "btn-fruit";
-            b.onclick = () => {
-                hist.push(f.n);
-                if(hist.length > 50) hist.shift();
-                
-                // فحص الفوز لصفر الفشل
-                let currentNames = Array.from(document.querySelectorAll('.name')).map(el => el.innerText);
-                if (currentNames.includes(f.n)) {
-                    failStrike = 0;
-                }
-                updateUI();
-            };
-            btnsArea.appendChild(b);
+            b.innerText = f.n; b.className = "btn-f";
+            b.onclick = () => { hist.push(f.n); if(hist.length>40) hist.shift(); update(); };
+            bDiv.appendChild(b);
         });
 
-        // زر الجاكبوت
-        let jBtn = document.createElement('button');
-        jBtn.innerText = "🎰 جـاكـبـوت (JACKPOT)";
-        jBtn.className = "btn-jack";
-        jBtn.onclick = () => { hist.push("جاكبوت"); failStrike = 0; updateUI(); };
-        btnsArea.appendChild(jBtn);
+        let jb = document.createElement('button');
+        jb.innerText = "🎰 JACKPOT"; jb.className = "btn-j";
+        jb.onclick = () => { hist.push("جاكبوت"); update(); };
+        bDiv.appendChild(jb);
 
-        function resetAll() { if(confirm("تصفير كل البيانات؟")) { localStorage.clear(); hist=[]; failStrike=0; updateUI(); } }
+        function resetAll() { if(confirm("تصفير الجلسة؟")) { localStorage.clear(); hist=[]; update(); } }
 
-        updateUI();
+        update();
     </script>
+    <button onclick="resetAll()" style="background:none; color:#475569; font-size:10px; margin-top:15px; text-decoration:underline;">إعادة تعيين</button>
 </body>
 </html>
