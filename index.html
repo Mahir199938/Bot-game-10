@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوت قناص الفواكه V18 - كاشف الأفخاخ</title>
+    <title>بوت قناص الفواكه V19 - كسر التعليق</title>
     <style>
         :root { --neon: #a855f7; --bg: #020617; --card: #1e1b4b; --gold: #fbbf24; --danger: #ef4444; --success: #4ade80; }
         body { font-family: sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        .scorecard { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 12px; width: 95%; max-width: 440px; box-shadow: 0 0 20px rgba(168,85,247,0.2); }
-        
-        /* تنبيه الفخ */
-        .trap-warning { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: #fca5a5; padding: 5px; border-radius: 5px; font-size: 10px; margin-top: 4px; display: none; }
+        .scorecard { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 12px; width: 95%; max-width: 440px; }
         
         #startupOverlay { background: rgba(0,0,0,0.8); border-radius: 10px; padding: 15px; text-align: center; margin-bottom: 10px; border: 1px solid var(--gold); }
         .quad-predictions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
-        .pred-item { text-align: center; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid #4338ca; position: relative; }
-        .is-trap { border-color: var(--danger) !important; opacity: 0.8; }
+        .pred-item { text-align: center; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid #4338ca; transition: 0.3s; }
         
+        /* تأثير عند تغيير التوقع */
+        .changing { animation: flash 0.5s; }
+        @keyframes flash { from { opacity: 0.5; } to { opacity: 1; } }
+
         .name { font-size: 16px; font-weight: bold; color: #f472b6; }
-        .bet-zone { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .bet-zone { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
         
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 95%; max-width: 440px; margin-top: 12px; }
         button { color: white; border: none; padding: 12px 5px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
@@ -33,23 +33,23 @@
 
     <div class="scorecard">
         <div id="startupOverlay">
-            <span style="color:var(--gold)">جمع بيانات الخوارزمية...</span>
+            <span style="color:var(--gold)">نظام كسر التعليق V19: أدخل 10 نتائج...</span>
             <div style="font-size: 20px; font-weight: bold;" id="startupCount">0 / 10</div>
         </div>
 
         <div id="mainAnalysis" style="display:none">
             <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px;">
                 <span>الرصيد: <b id="bal" style="color:var(--success)">0</b></span>
-                <span>الربح: <b id="prof">0</b></span>
+                <span id="statusLabel" style="color:var(--gold)">جاري التحليل...</span>
             </div>
 
-            <div id="smartTip" style="font-size: 11px; color: #e9d5ff; text-align: center; padding: 5px; background: rgba(255,255,255,0.05); border-radius: 5px;"></div>
+            <div id="smartTip" style="font-size: 11px; color: #e9d5ff; text-align: center; padding: 5px; background: rgba(255,255,255,0.05); border-radius: 5px; margin-bottom: 10px;"></div>
             
             <div class="quad-predictions" id="quadBox"></div>
 
             <div class="bet-zone">
                 <div style="font-size: 13px;">الرهان الموصى به: <b id="bt" style="color:var(--gold)">10,000</b></div>
-                <button onclick="triggerLoss()" style="background:var(--danger); padding:5px 10px; font-size:10px; border-radius:5px;">خسارة / مضاعفة</button>
+                <button onclick="triggerLoss()" style="background:var(--danger); padding:5px 10px; font-size:10px; border-radius:5px;">مضاعفة الخسارة</button>
             </div>
         </div>
 
@@ -58,8 +58,8 @@
 
     <div class="grid" id="btns"></div>
     
-    <div style="margin-top:15px; display: flex; gap: 10px;">
-        <button onclick="reset()" style="background: #475569; padding: 10px 20px; border-radius: 8px; font-size: 12px;">تصفير الجلسة</button>
+    <div style="margin-top:15px;">
+        <button onclick="reset()" style="background: #475569; padding: 8px 15px; border-radius: 8px; font-size: 11px;">تصفير الجلسة</button>
     </div>
 
     <script>
@@ -69,11 +69,10 @@
             {n: "كيوي", x: 5}, {n: "عنب", x: 5}
         ];
 
-        let hist = JSON.parse(localStorage.getItem('h18')) || [];
-        let bal = parseFloat(localStorage.getItem('b18')) || 1000000;
-        let startB = parseFloat(localStorage.getItem('s18')) || bal;
+        let hist = JSON.parse(localStorage.getItem('h19')) || [];
+        let bal = parseFloat(localStorage.getItem('b19')) || 1000000;
         let multiply = 1;
-        let lossCount = 0;
+        let failStrike = 0; // عدد مرات فشل التوقع المتتالي
 
         function update() {
             document.getElementById('startupCount').innerText = hist.length + " / 10";
@@ -82,58 +81,59 @@
             if (hist.length >= 10) {
                 document.getElementById('startupOverlay').style.display = "none";
                 document.getElementById('mainAnalysis').style.display = "block";
-                calculateV18();
+                calculateV19();
             }
-            
             document.getElementById('bal').innerText = Math.floor(bal).toLocaleString();
-            let profit = bal - startB;
-            document.getElementById('prof').innerText = (profit>=0?"+":"") + Math.floor(profit).toLocaleString();
-            document.getElementById('prof').style.color = profit>=0? "var(--success)" : "var(--danger)";
-            
-            let baseBet = 10000;
-            document.getElementById('bt').innerText = (baseBet * multiply).toLocaleString();
+            document.getElementById('bt').innerText = (10000 * multiply).toLocaleString();
             save();
         }
 
-        function calculateV18() {
-            let lastTwo = hist.slice(-2);
-            let isTrapActive = (lastTwo.length === 2 && lastTwo[0] === lastTwo[1]);
-            let trapFruit = isTrapActive ? lastTwo[0] : null;
-
+        function calculateV19() {
+            // منطق جديد: استبعاد الفواكه اللي "تكررت" أو "تأخرت بزيادة" وقت الخسارة
+            let lastFruit = hist[hist.length - 1];
+            
             let scores = fruits.map(f => {
-                let last = hist.lastIndexOf(f.n);
-                let gap = last === -1 ? 30 : hist.length - 1 - last;
-                let score = gap * 5;
+                let lastIdx = hist.lastIndexOf(f.n);
+                let gap = lastIdx === -1 ? 20 : hist.length - 1 - lastIdx;
+                
+                // قوة الاحتمال الأساسية
+                let s = gap * 10;
 
-                // إذا كانت الفاكهة هي "الفخ" (تكررت مرتين)، خفض تقييمها فوراً
-                if (f.n === trapFruit) score -= 100;
+                // 1. كسر التعليق: إذا فشلنا 3 مرات، قلل وزن الفواكه اللي كانت في التوقع السابق
+                if (failStrike >= 3) s -= 100;
 
-                // الكرز والبطيخ لا يظهران إلا في الفجوات الكبيرة
-                if (f.x >= 20 && gap < 15) score -= 40;
+                // 2. حماية الكرز والبطيخ: لا تظهر في التوقعات إلا إذا كانت الفجوة معقولة جداً (بين 15 و 30)
+                // إذا غابت أكثر من 30 جولة، نعتبرها "ميتة" حالياً ولا نطاردها
+                if (f.x >= 20 && (gap < 15 || gap > 35)) s = -500;
 
-                return { n: f.n, s: score, x: f.x, trap: f.n === trapFruit };
+                // 3. منع تكرار نفس الفاكهة فوراً
+                if (f.n === lastFruit) s = -1000;
+
+                return { n: f.n, s: s, x: f.x };
             }).sort((a,b) => b.s - a.s);
 
-            let tip = document.getElementById('smartTip');
-            if (isTrapActive) {
-                tip.innerHTML = `⚠️ <b style="color:var(--danger)">تنبيه فخ:</b> تكرار ${trapFruit}. تجنب المراهنة عليه الآن!`;
-            } else {
-                tip.innerText = "💡 الخوارزمية مستقرة. اتبع التوقعات الأربعة.";
-            }
-
-            document.getElementById('quadBox').innerHTML = scores.slice(0, 4).map(s => `
-                <div class="pred-item ${s.trap ? 'is-trap' : ''}">
+            let top4 = scores.slice(0, 4);
+            
+            document.getElementById('quadBox').innerHTML = top4.map(s => `
+                <div class="pred-item changing">
                     <span style="font-size:10px; color:#818cf8">${s.x}x</span>
                     <div class="name">${s.n}</div>
-                    ${s.trap ? '<div class="trap-warning" style="display:block">⚠️ فخ تكرار</div>' : ''}
                 </div>
             `).join('');
+
+            let tip = document.getElementById('smartTip');
+            if (failStrike >= 3) {
+                tip.innerHTML = "⚠️ <b style="color:var(--danger)">تغيير الاستراتيجية:</b> تم استبعاد التوقعات المعلقة. ارجع لـ 10K.";
+                multiply = 1;
+            } else {
+                tip.innerText = "💡 الخوارزمية تبحث عن أنماط نشطة حالياً.";
+            }
         }
 
         function triggerLoss() {
-            lossCount++;
+            failStrike++;
             multiply *= 2;
-            if (lossCount > 4) { multiply = 1; lossCount = 0; }
+            if (failStrike > 4) { multiply = 1; failStrike = 0; }
             update();
         }
 
@@ -142,8 +142,18 @@
             let b = document.createElement('button');
             b.innerText = f.n; b.className = "btn-fruit";
             b.onclick = () => {
-                hist.push(f.n); if(hist.length > 50) hist.shift();
-                multiply = 1; lossCount = 0; update();
+                // فحص هل ضغطنا شي في التوقعات؟
+                let currentPreds = Array.from(document.querySelectorAll('.name')).map(el => el.innerText);
+                if (currentPreds.includes(f.n)) {
+                    failStrike = 0; // صفر الفشل لأن التوقع أصاب
+                    multiply = 1;
+                } else {
+                    failStrike++; // زِد الفشل لأننا اخترنا شي خارج التوقع أو التوقع أخطأ
+                }
+                
+                hist.push(f.n);
+                if(hist.length > 50) hist.shift();
+                update();
             };
             grid.appendChild(b);
         });
@@ -151,14 +161,13 @@
         let jBtn = document.createElement('button');
         jBtn.innerText = "🎰 جـاكـبـوت (JACKPOT)";
         jBtn.className = "btn-jack";
-        jBtn.onclick = () => { hist.push("جاكبوت"); multiply = 1; lossCount = 0; update(); };
+        jBtn.onclick = () => { hist.push("جاكبوت"); failStrike = 0; multiply = 1; update(); };
         grid.appendChild(jBtn);
 
-        function reset() { if(confirm("تصفير الجلسة؟")) { localStorage.clear(); location.reload(); } }
+        function reset() { localStorage.clear(); location.reload(); }
         function save() {
-            localStorage.setItem('h18', JSON.stringify(hist));
-            localStorage.setItem('b18', bal);
-            localStorage.setItem('s18', startB);
+            localStorage.setItem('h19', JSON.stringify(hist));
+            localStorage.setItem('b19', bal);
         }
         update();
     </script>
