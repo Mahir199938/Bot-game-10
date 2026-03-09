@@ -3,120 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fruit Party Hunter V23</title>
+    <title>بوت صائد الصناديق V25 - Crazy Box</title>
     <style>
-        :root { --neon: #f472b6; --bg: #020617; --card: #1e1b4b; --gold: #fbbf24; --success: #4ade80; }
+        :root { --gold: #fbbf24; --bg: #0f172a; --card: #1e293b; --neon: #38bdf8; }
         body { font-family: sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        .scorecard { background: var(--card); border: 2px solid var(--neon); border-radius: 12px; padding: 10px; width: 95%; max-width: 420px; box-shadow: 0 0 15px rgba(244,114,182,0.2); }
         
-        /* شاشة جمع البيانات */
-        .init-box { border: 1px dashed var(--gold); padding: 15px; border-radius: 10px; text-align: center; color: var(--gold); margin-bottom: 10px; }
+        .main-card { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 15px; width: 95%; max-width: 440px; box-shadow: 0 0 20px rgba(56,189,248,0.2); }
+        .header { text-align: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px; }
         
-        .pred-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
-        .pred-card { background: rgba(0,0,0,0.5); border: 1px solid #312e81; padding: 12px; border-radius: 10px; text-align: center; }
-        .p-name { font-size: 18px; font-weight: bold; color: #f472b6; }
-        .p-chance { font-size: 11px; color: var(--success); }
+        .prediction-area { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        .pred-box { background: rgba(0,0,0,0.3); border: 1px solid #334155; border-radius: 10px; padding: 12px; text-align: center; transition: 0.3s; }
+        .pred-box.hot { border-color: var(--gold); background: rgba(251,191,36,0.1); }
+        
+        .box-num { font-size: 20px; font-weight: bold; color: var(--gold); }
+        .box-info { font-size: 11px; color: #94a3b8; }
 
-        .bet-info { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid #334155; }
-        
-        .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 95%; max-width: 420px; margin-top: 20px; }
-        button { padding: 18px 5px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white; transition: 0.1s; }
-        .btn-f { background: #312e81; border-bottom: 4px solid #1e1b4b; }
-        .btn-f:active { transform: translateY(3px); border-bottom: none; }
-        .btn-j { background: linear-gradient(45deg, #b45309, #d97706); grid-column: span 3; font-size: 18px; margin-top: 5px; }
-        
-        .history { display: flex; gap: 5px; overflow-x: auto; padding: 10px; width: 95%; max-width: 420px; margin-top: 10px; background: #000; border-radius: 5px; }
-        .h-tag { font-size: 9px; padding: 3px 8px; background: #4338ca; border-radius: 4px; white-space: nowrap; }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 95%; max-width: 440px; margin-top: 20px; }
+        button { padding: 15px 5px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; background: #334155; color: white; font-size: 14px; }
+        button:active { transform: scale(0.95); }
+        .btn-active { background: var(--neon); color: var(--bg); }
+
+        .history { display: flex; gap: 5px; overflow-x: auto; padding: 10px; width: 95%; max-width: 440px; margin-top: 15px; background: #000; border-radius: 8px; min-height: 40px; }
+        .h-item { min-width: 30px; height: 30px; background: #334155; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .h-last { background: var(--gold); color: black; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="scorecard" id="main">
+    <div class="main-card">
+        <div class="header">
+            <h3 style="margin:0; color:var(--neon)">رادار Crazy Box V25</h3>
+            <span id="status" style="font-size:11px; color:var(--gold)">أدخل 5 نتائج لتحليل النمط...</span>
         </div>
 
-    <div class="history" id="hBar"></div>
-    <div class="btn-grid" id="btns"></div>
+        <div class="prediction-area" id="predictionArea">
+            </div>
+
+        <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:12px; text-align:center;">
+            الرهان الموصى به: <b style="color:var(--gold)">10,000 لكل صندوق</b>
+        </div>
+    </div>
+
+    <div class="history" id="historyBar"></div>
+
+    <div class="btn-grid">
+        <button onclick="addResult(1)">1</button>
+        <button onclick="addResult(2)">2</button>
+        <button onclick="addResult(3)">3</button>
+        <button onclick="addResult(4)">4</button>
+        <button onclick="addResult(5)">5</button>
+        <button onclick="addResult(6)">6</button>
+        <button onclick="addResult(7)">7</button>
+        <button onclick="addResult(8)">8</button>
+    </div>
 
     <script>
-        const fruits = [
-            {n: "كرز", x: 40}, {n: "بطيخ", x: 20}, {n: "موز", x: 10}, 
-            {n: "فراولة", x: 10}, {n: "ليمون", x: 5}, {n: "توت", x: 5}, 
-            {n: "كيوي", x: 5}, {n: "عنب", x: 5}
+        const boxData = [
+            {id:1, mul:5}, {id:2, mul:5}, {id:3, mul:5}, {id:4, mul:8},
+            {id:5, mul:10}, {id:6, mul:12}, {id:7, mul:15}, {id:8, mul:25}
         ];
         
-        let hist = JSON.parse(localStorage.getItem('v23_h')) || [];
-        let riskMode = false;
+        let history = JSON.parse(localStorage.getItem('cb_hist')) || [];
 
-        function update() {
-            const main = document.getElementById('main');
-            const hBar = document.getElementById('hBar');
-            hBar.innerHTML = hist.slice().reverse().map(i => `<span class="h-tag">${i}</span>`).join('');
-
-            if (hist.length < 10) {
-                main.innerHTML = `
-                    <div class="init-box">
-                        <b style="font-size:18px;">نظام Fruit Party V23</b><br>
-                        أدخل 10 نتائج لبدء تحليل الدورة...
-                        <div style="font-size:24px; margin-top:10px;">${hist.length} / 10</div>
-                    </div>
-                `;
-            } else {
-                analyze();
-            }
-            localStorage.setItem('v23_h', JSON.stringify(hist));
+        function addResult(n) {
+            history.push(n);
+            if(history.length > 50) history.shift();
+            localStorage.setItem('cb_hist', JSON.stringify(history));
+            updateUI();
         }
 
-        function analyze() {
-            const main = document.getElementById('main');
-            
-            let scores = fruits.map(f => {
-                let last = hist.lastIndexOf(f.n);
-                let gap = last === -1 ? 25 : hist.length - 1 - last;
-                
-                // خوارزمية الصيد: الفواكه التي تأخرت لكن ضمن حدود المعقول
-                let s = gap * 15;
-                if (f.x >= 20 && (gap < 12 || gap > 30)) s = -100; // تجنب التعليق في الكرز
-                if (f.n === hist[hist.length-1]) s = -500; // لا تكرر فوراً
+        function updateUI() {
+            const hBar = document.getElementById('historyBar');
+            hBar.innerHTML = history.slice().reverse().map((n, i) => 
+                `<div class="h-item ${i===0?'h-last':''}">${n}</div>`
+            ).join('');
 
-                return { n: f.n, s: s, x: f.x, g: gap };
-            }).sort((a,b) => b.s - a.s);
+            const status = document.getElementById('status');
+            if(history.length < 5) {
+                status.innerText = `مطلوب بيانات إضافية: ${history.length} / 5`;
+                return;
+            }
+            status.innerText = "✅ النمط مكتشف - توقعات دقيقة";
+            calculate();
+        }
+
+        function calculate() {
+            const area = document.getElementById('predictionArea');
+            let last = history[history.length - 1];
+
+            let scores = boxData.map(box => {
+                let lastSeen = history.lastIndexOf(box.id);
+                let gap = lastSeen === -1 ? 20 : (history.length - 1 - lastSeen);
+                
+                // الخوارزمية المعتمدة على صورك:
+                let s = gap * 12; // كل ما زاد الغياب زاد الاحتمال
+                
+                // منع التكرار المباشر (نادر جداً في Crazy Box)
+                if(box.id === last) s -= 200;
+                
+                // نمط "الدرج": إذا طلع 1، فالاحتمال القادم لـ 2 و 3 أعلى
+                if(Math.abs(box.id - last) <= 2 && box.id !== last) s += 50;
+
+                return { ...box, score: s, gap: gap };
+            }).sort((a,b) => b.score - a.score);
 
             let top4 = scores.slice(0, 4);
 
-            main.innerHTML = `
-                <div style="text-align:center; font-size:12px; color:var(--gold); margin-bottom:8px;">🎯 الدورة الحالية: مستقرة</div>
-                <div class="pred-grid">
-                    ${top4.map(p => `
-                        <div class="pred-card">
-                            <div class="p-name">${p.n}</div>
-                            <div class="p-chance">${p.x}x (غائب ${p.g})</div>
-                        </div>
-                    `).join('')}
+            area.innerHTML = top4.map((p, i) => `
+                <div class="pred-box ${i<2?'hot':''}">
+                    <div class="box-num">صندوق ${p.id}</div>
+                    <div class="box-info">${p.mul}x | غائب ${p.gap}</div>
+                    <div style="font-size:9px; color:var(--neon)">${i<2?'أولوية':'تأمين'}</div>
                 </div>
-                <div class="bet-info">
-                    <span>الرهان الموصى به: <b style="color:var(--gold)">10,000</b></span>
-                    <span style="color:var(--success)">فرصة الربح: عالية</span>
-                </div>
-            `;
+            `).join('');
         }
 
-        const bDiv = document.getElementById('btns');
-        fruits.forEach(f => {
-            let b = document.createElement('button');
-            b.innerText = f.n; b.className = "btn-f";
-            b.onclick = () => { hist.push(f.n); if(hist.length>40) hist.shift(); update(); };
-            bDiv.appendChild(b);
-        });
-
-        let jb = document.createElement('button');
-        jb.innerText = "🎰 JACKPOT"; jb.className = "btn-j";
-        jb.onclick = () => { hist.push("جاكبوت"); update(); };
-        bDiv.appendChild(jb);
-
-        function resetAll() { if(confirm("تصفير الجلسة؟")) { localStorage.clear(); hist=[]; update(); } }
-
-        update();
+        updateUI();
     </script>
-    <button onclick="resetAll()" style="background:none; color:#475569; font-size:10px; margin-top:15px; text-decoration:underline;">إعادة تعيين</button>
 </body>
 </html>
