@@ -3,92 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوت قناص الفواكه V16 - المؤشر الذكي</title>
+    <title>بوت قناص الفواكه V18 - كاشف الأفخاخ</title>
     <style>
-        :root { --neon: #a855f7; --bg: #020617; --card: #1e1b4b; --gold: #fbbf24; --danger: #ef4444; --success: #4ade80; --cold: #38bdf8; }
+        :root { --neon: #a855f7; --bg: #020617; --card: #1e1b4b; --gold: #fbbf24; --danger: #ef4444; --success: #4ade80; }
         body { font-family: sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        .scorecard { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 12px; width: 95%; max-width: 440px; box-shadow: 0 0 20px rgba(168,85,247,0.2); }
         
-        .scorecard { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 12px; width: 95%; max-width: 440px; box-shadow: 0 0 30px rgba(168,85,247,0.3); }
+        /* تنبيه الفخ */
+        .trap-warning { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: #fca5a5; padding: 5px; border-radius: 5px; font-size: 10px; margin-top: 4px; display: none; }
         
-        /* مؤشر حرارة اللعبة */
-        .heat-container { width: 100%; height: 8px; background: #0f172a; border-radius: 4px; margin: 10px 0; overflow: hidden; border: 1px solid #334155; }
-        #heatBar { height: 100%; width: 50%; background: linear-gradient(90deg, var(--cold), var(--danger)); transition: 1s; }
-        .heat-label { font-size: 10px; display: flex; justify-content: space-between; margin-bottom: 2px; color: #94a3b8; }
-
-        /* النصيحة الذكية */
-        .pro-tip { background: rgba(168, 85, 247, 0.1); border-left: 4px solid var(--neon); padding: 8px; border-radius: 5px; font-size: 12px; margin-bottom: 10px; color: #e9d5ff; font-style: italic; }
-
-        .goal-status { background: rgba(74, 222, 128, 0.1); border: 1px dashed var(--success); border-radius: 8px; padding: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 11px; }
-        .goal-met { background: var(--gold) !important; color: black !important; font-weight: bold; }
-
-        .risk-shield { padding: 8px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: none; }
-        .risk-warn { background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #f59e0b; display: block; }
-        .risk-stop { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: var(--danger); display: block; }
-
-        .jackpot-radar { background: rgba(251, 191, 36, 0.1); border: 2px double var(--gold); border-radius: 12px; padding: 8px; margin-bottom: 10px; text-align: center; }
-        .jack-status { font-size: 20px; font-weight: bold; }
-
+        #startupOverlay { background: rgba(0,0,0,0.8); border-radius: 10px; padding: 15px; text-align: center; margin-bottom: 10px; border: 1px solid var(--gold); }
         .quad-predictions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
-        .pred-item { text-align: center; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid #4338ca; }
-        .double-down { border: 2px solid var(--gold) !important; box-shadow: 0 0 10px var(--gold); }
+        .pred-item { text-align: center; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid #4338ca; position: relative; }
+        .is-trap { border-color: var(--danger) !important; opacity: 0.8; }
+        
         .name { font-size: 16px; font-weight: bold; color: #f472b6; }
-        .stars { color: var(--gold); font-size: 9px; }
-
         .bet-zone { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .history-bar { background: #020617; border-radius: 8px; padding: 8px; margin: 10px 0; display: flex; gap: 6px; overflow-x: auto; min-height: 25px; }
-        .h-item { font-size: 10px; padding: 3px 10px; background: #312e81; border-radius: 5px; white-space: nowrap; }
-
+        
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 95%; max-width: 440px; margin-top: 12px; }
-        button { color: white; border: none; padding: 12px 5px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button { color: white; border: none; padding: 12px 5px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
         .btn-fruit { background: #312e81; border-bottom: 3px solid #1e1b4b; }
-        .btn-jack { background: linear-gradient(to bottom, #b45309, #78350f); border: 2px solid var(--gold); grid-column: span 3; margin-top: 5px; font-size: 18px; }
-        .combo-highlight { box-shadow: 0 0 15px var(--neon); border: 2px solid #fff !important; }
-
-        .controls { margin-top: 15px; display: flex; gap: 5px; width: 95%; max-width: 440px; flex-wrap: wrap; }
-        input { background: #020617; border: 1px solid var(--neon); color: white; padding: 10px; border-radius: 8px; flex: 1; font-size: 12px; min-width: 120px; }
+        .btn-jack { background: linear-gradient(to bottom, #b45309, #78350f); border: 2px solid var(--gold); grid-column: span 3; }
+        
+        .history-bar { background: #020617; border-radius: 8px; padding: 8px; margin: 10px 0; display: flex; gap: 6px; overflow-x: auto; }
+        .h-item { font-size: 10px; padding: 3px 10px; background: #312e81; border-radius: 5px; }
     </style>
 </head>
 <body>
 
     <div class="scorecard">
-        <div class="goal-status" id="goalBar">
-            <span>الهدف: <b id="goalValDisplay">0</b></span>
-            <span id="goalPercent">التقدم: 0%</span>
+        <div id="startupOverlay">
+            <span style="color:var(--gold)">جمع بيانات الخوارزمية...</span>
+            <div style="font-size: 20px; font-weight: bold;" id="startupCount">0 / 10</div>
         </div>
 
-        <div class="heat-label"><span>❄️ هادئة</span><span>🔥 مشتعلة</span></div>
-        <div class="heat-container"><div id="heatBar"></div></div>
+        <div id="mainAnalysis" style="display:none">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px;">
+                <span>الرصيد: <b id="bal" style="color:var(--success)">0</b></span>
+                <span>الربح: <b id="prof">0</b></span>
+            </div>
 
-        <div id="riskShield" class="risk-shield"></div>
-        <div class="pro-tip" id="smartTip">ابدأ بإدخال آخر النتائج لبدء التحليل...</div>
+            <div id="smartTip" style="font-size: 11px; color: #e9d5ff; text-align: center; padding: 5px; background: rgba(255,255,255,0.05); border-radius: 5px;"></div>
+            
+            <div class="quad-predictions" id="quadBox"></div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
-            <span>الرصيد: <b id="bal" style="color: var(--success);">0</b></span>
-            <span>الربح: <b id="prof">0</b></span>
-        </div>
-
-        <div class="jackpot-radar">
-            <span style="font-size: 10px; color: var(--gold);">🎰 رادار الجاكبوت الحقيقي</span>
-            <span id="jackStatus" class="jack-status">---</span>
-        </div>
-
-        <div class="quad-predictions" id="quadBox"></div>
-
-        <div class="bet-zone">
-            <div style="font-size: 14px;">الرهان: <b id="bt" style="color:var(--gold)">10,000</b></div>
-            <button onclick="triggerLoss()" style="background:var(--danger); padding:6px 12px; font-size:11px; border-radius:5px;">❌ تعويض الخسارة</button>
+            <div class="bet-zone">
+                <div style="font-size: 13px;">الرهان الموصى به: <b id="bt" style="color:var(--gold)">10,000</b></div>
+                <button onclick="triggerLoss()" style="background:var(--danger); padding:5px 10px; font-size:10px; border-radius:5px;">خسارة / مضاعفة</button>
+            </div>
         </div>
 
         <div class="history-bar" id="hBar"></div>
     </div>
 
     <div class="grid" id="btns"></div>
-
-    <div class="controls">
-        <input type="number" id="inB" placeholder="الرصيد">
-        <input type="number" id="inG" placeholder="هدف الربح">
-        <button onclick="set()" style="background: #a855f7; padding: 10px; font-size: 12px; flex: 1;">حفظ</button>
-        <button onclick="reset()" style="background: #475569; padding: 10px; font-size: 12px;">تصفير</button>
+    
+    <div style="margin-top:15px; display: flex; gap: 10px;">
+        <button onclick="reset()" style="background: #475569; padding: 10px 20px; border-radius: 8px; font-size: 12px;">تصفير الجلسة</button>
     </div>
 
     <script>
@@ -98,113 +69,97 @@
             {n: "كيوي", x: 5}, {n: "عنب", x: 5}
         ];
 
-        let hist = JSON.parse(localStorage.getItem('h16')) || [];
-        let bal = parseFloat(localStorage.getItem('b16')) || 0;
-        let startB = parseFloat(localStorage.getItem('s16')) || bal;
-        let goalAmount = parseFloat(localStorage.getItem('g16')) || 0;
+        let hist = JSON.parse(localStorage.getItem('h18')) || [];
+        let bal = parseFloat(localStorage.getItem('b18')) || 1000000;
+        let startB = parseFloat(localStorage.getItem('s18')) || bal;
         let multiply = 1;
-        let lossStreak = 0;
+        let lossCount = 0;
 
         function update() {
+            document.getElementById('startupCount').innerText = hist.length + " / 10";
+            document.getElementById('hBar').innerHTML = hist.slice().reverse().map(i => `<span class="h-item">${i}</span>`).join('');
+            
+            if (hist.length >= 10) {
+                document.getElementById('startupOverlay').style.display = "none";
+                document.getElementById('mainAnalysis').style.display = "block";
+                calculateV18();
+            }
+            
             document.getElementById('bal').innerText = Math.floor(bal).toLocaleString();
             let profit = bal - startB;
-            document.getElementById('prof').innerText = (profit>=0?"+":"")+Math.floor(profit).toLocaleString();
-            document.getElementById('prof').style.color = profit>=0?"#4ade80":"#ef4444";
+            document.getElementById('prof').innerText = (profit>=0?"+":"") + Math.floor(profit).toLocaleString();
+            document.getElementById('prof').style.color = profit>=0? "var(--success)" : "var(--danger)";
             
-            if (goalAmount > 0) {
-                let progress = Math.max(0, Math.min((profit / goalAmount) * 100, 100));
-                document.getElementById('goalPercent').innerText = "التقدم: " + Math.round(progress) + "%";
-                if (profit >= goalAmount) {
-                    document.getElementById('goalBar').classList.add('goal-met');
-                    document.getElementById('goalBar').innerText = "🏆 تم تحقيق الهدف! اسحب الآن";
-                }
-            }
-
-            let baseBet = Math.max(Math.floor(bal * 0.01), 10000);
+            let baseBet = 10000;
             document.getElementById('bt').innerText = (baseBet * multiply).toLocaleString();
-            document.getElementById('hBar').innerHTML = hist.slice().reverse().map(i => `<span class="h-item">${i}</span>`).join('');
-
-            calculateV16();
             save();
         }
 
-        function calculateV16() {
-            // 1. مؤشر الحرارة
-            let recent = hist.slice(-10);
-            let bigWins = recent.filter(h => {
-                let f = fruits.find(fr => fr.n === h);
-                return f && f.x >= 10;
-            }).length;
-            document.getElementById('heatBar').style.width = (bigWins * 10) + "%";
+        function calculateV18() {
+            let lastTwo = hist.slice(-2);
+            let isTrapActive = (lastTwo.length === 2 && lastTwo[0] === lastTwo[1]);
+            let trapFruit = isTrapActive ? lastTwo[0] : null;
 
-            // 2. رادار الجاكبوت
-            let lastJack = hist.lastIndexOf("جاكبوت");
-            let jackGap = lastJack === -1 ? hist.length : hist.length - 1 - lastJack;
-            document.getElementById('jackStatus').innerText = jackGap > 20 ? "🔥 فرصة عالية" : "انتظار النمط";
-
-            // 3. النصيحة الذكية
-            let tip = document.getElementById('smartTip');
-            if (lossStreak >= 3) tip.innerText = "💡 نصيحة: اللعبة في وضع سحب، جرب الرهان بالحد الأدنى.";
-            else if (jackGap > 25) tip.innerText = "💡 نصيحة: الجاكبوت تأخر جداً، ركز رهاناً بسيطاً عليه.";
-            else if (bigWins > 4) tip.innerText = "💡 نصيحة: اللعبة 'ساخنة' الآن، استغل الفرصة بقنص الكرز.";
-            else tip.innerText = "💡 نصيحة: اتبع التوقعات المزدوجة (بالإطار الذهبي).";
-
-            // 4. التوقعات الأربعة والمزدوجة
             let scores = fruits.map(f => {
-                let count = hist.filter(h => h === f.n).length;
                 let last = hist.lastIndexOf(f.n);
-                let gap = last === -1 ? 25 : hist.length - 1 - last;
-                let weight = (gap * 8) + ((hist.length - count) * 4) + (f.x / 2);
-                if(hist.slice(-1).includes(f.n)) weight -= 100;
-                return { n: f.n, s: weight, gap: gap, x: f.x };
+                let gap = last === -1 ? 30 : hist.length - 1 - last;
+                let score = gap * 5;
+
+                // إذا كانت الفاكهة هي "الفخ" (تكررت مرتين)، خفض تقييمها فوراً
+                if (f.n === trapFruit) score -= 100;
+
+                // الكرز والبطيخ لا يظهران إلا في الفجوات الكبيرة
+                if (f.x >= 20 && gap < 15) score -= 40;
+
+                return { n: f.n, s: score, x: f.x, trap: f.n === trapFruit };
             }).sort((a,b) => b.s - a.s);
 
-            document.getElementById('quadBox').innerHTML = scores.slice(0, 4).map((s, i) => {
-                let isDouble = i < 2; 
-                let stars = s.gap > 12 ? "⭐⭐⭐" : (s.gap > 6 ? "⭐⭐" : "⭐");
-                return `<div class="pred-item ${isDouble?'double-down':''}"><span style="font-size:10px;color:#818cf8">${s.x}x</span><div class="name">${s.n}</div><span class="stars">${stars}</span></div>`;
-            }).join('');
+            let tip = document.getElementById('smartTip');
+            if (isTrapActive) {
+                tip.innerHTML = `⚠️ <b style="color:var(--danger)">تنبيه فخ:</b> تكرار ${trapFruit}. تجنب المراهنة عليه الآن!`;
+            } else {
+                tip.innerText = "💡 الخوارزمية مستقرة. اتبع التوقعات الأربعة.";
+            }
 
-            // درع المخاطر
-            let shield = document.getElementById('riskShield');
-            if (lossStreak >= 5) { shield.className = "risk-shield risk-stop"; shield.innerText = "🛑 توقف! 5 خسارات متتالية."; shield.style.display="block"; }
-            else if (lossStreak >= 3) { shield.className = "risk-shield risk-warn"; shield.innerText = "⚠️ تحذير: سلسلة خسارة بدأت."; shield.style.display="block"; }
-            else shield.style.display="none";
+            document.getElementById('quadBox').innerHTML = scores.slice(0, 4).map(s => `
+                <div class="pred-item ${s.trap ? 'is-trap' : ''}">
+                    <span style="font-size:10px; color:#818cf8">${s.x}x</span>
+                    <div class="name">${s.n}</div>
+                    ${s.trap ? '<div class="trap-warning" style="display:block">⚠️ فخ تكرار</div>' : ''}
+                </div>
+            `).join('');
         }
 
-        function triggerLoss() { multiply *= 2.2; lossStreak++; update(); }
-
-        function set() {
-            let b = document.getElementById('inB').value;
-            let g = document.getElementById('inG').value;
-            if(b) { bal = parseFloat(b); startB = bal; multiply = 1; lossStreak = 0; }
-            if(g) goalAmount = parseFloat(g);
+        function triggerLoss() {
+            lossCount++;
+            multiply *= 2;
+            if (lossCount > 4) { multiply = 1; lossCount = 0; }
             update();
-        }
-
-        function reset() { if(confirm("تصفير؟")) { hist=[]; multiply=1; localStorage.clear(); location.reload(); } }
-        function save() {
-            localStorage.setItem('h16', JSON.stringify(hist));
-            localStorage.setItem('b16', bal);
-            localStorage.setItem('s16', startB);
-            localStorage.setItem('g16', goalAmount);
         }
 
         const grid = document.getElementById('btns');
         fruits.forEach(f => {
             let b = document.createElement('button');
-            b.innerText = f.n + " (" + f.x + "x)";
-            b.className = "btn-fruit";
-            b.onclick = () => { hist.push(f.n); if(hist.length > 60) hist.shift(); multiply = 1; lossStreak = 0; update(); };
+            b.innerText = f.n; b.className = "btn-fruit";
+            b.onclick = () => {
+                hist.push(f.n); if(hist.length > 50) hist.shift();
+                multiply = 1; lossCount = 0; update();
+            };
             grid.appendChild(b);
         });
         
         let jBtn = document.createElement('button');
         jBtn.innerText = "🎰 جـاكـبـوت (JACKPOT)";
         jBtn.className = "btn-jack";
-        jBtn.onclick = () => { hist.push("جاكبوت"); multiply = 1; lossStreak = 0; update(); };
+        jBtn.onclick = () => { hist.push("جاكبوت"); multiply = 1; lossCount = 0; update(); };
         grid.appendChild(jBtn);
 
+        function reset() { if(confirm("تصفير الجلسة؟")) { localStorage.clear(); location.reload(); } }
+        function save() {
+            localStorage.setItem('h18', JSON.stringify(hist));
+            localStorage.setItem('b18', bal);
+            localStorage.setItem('s18', startB);
+        }
         update();
     </script>
 </body>
