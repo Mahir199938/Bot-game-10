@@ -3,64 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dragon Tiger SOVEREIGN V32</title>
+    <title>Dragon Tiger SOVEREIGN V33</title>
     <style>
-        :root { --d: #ff4d4d; --t: #4d94ff; --bg: #010409; --accent: #00ffcc; --gold: #ffd700; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        .master-panel { background: linear-gradient(145deg, #0d1117, #161b22); border: 2px solid #30363d; border-radius: 25px; padding: 20px; width: 95%; max-width: 450px; box-shadow: 0 0 50px rgba(0,255,204,0.1); position: relative; overflow: hidden; }
-        .sovereign-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        :root { --d: #ff4d4d; --t: #4d94ff; --tie: #eab308; --bg: #010409; --accent: #00ffcc; --gold: #ffd700; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        .master-panel { background: linear-gradient(145deg, #0d1117, #161b22); border: 2px solid #30363d; border-radius: 25px; padding: 20px; width: 95%; max-width: 450px; box-shadow: 0 0 50px rgba(0,255,204,0.15); position: relative; }
+        .sovereign-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
         .time-sync { font-size: 10px; color: var(--accent); letter-spacing: 1px; }
-        .signal-core { text-align: center; padding: 30px 10px; background: rgba(0,0,0,0.5); border-radius: 20px; border: 1px dashed #30363d; margin-bottom: 20px; }
-        #nextMove { font-size: 50px; font-weight: 900; text-transform: uppercase; margin: 10px 0; }
-        .strategy-tag { background: var(--gold); color: black; padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; }
-        .bet-value { font-size: 18px; color: #fff; margin-top: 10px; font-family: monospace; }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn { padding: 22px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        .trap-alert { background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px; border-radius: 8px; font-size: 10px; margin-bottom: 10px; display: none; text-align: center; }
+        .signal-core { text-align: center; padding: 20px 10px; background: rgba(0,0,0,0.5); border-radius: 20px; border: 1px dashed #30363d; margin-bottom: 15px; }
+        #nextMove { font-size: 48px; font-weight: 900; margin: 10px 0; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn { padding: 20px; border-radius: 12px; border: none; font-size: 18px; font-weight: bold; cursor: pointer; color: white; transition: 0.1s; }
         .btn-d { background: var(--d); box-shadow: 0 4px 0 #8b0000; }
         .btn-t { background: var(--t); box-shadow: 0 4px 0 #00008b; }
-        .h-strip { display: flex; gap: 5px; overflow-x: auto; padding: 15px; width: 95%; max-width: 450px; }
-        .dot { min-width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid rgba(255,255,255,0.1); }
-        .pulse { animation: p-glow 2s infinite; }
-        @keyframes p-glow { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        .btn-tie { background: var(--tie); box-shadow: 0 4px 0 #854d0e; grid-column: span 2; padding: 15px; margin-top: 5px; color: black; }
+        .h-strip { display: flex; gap: 5px; overflow-x: auto; padding: 12px; width: 95%; max-width: 450px; background: #000; border-radius: 10px; margin-top: 10px; }
+        .dot { min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="master-panel">
         <div class="sovereign-header">
-            <div class="time-sync">TIME-SYNC: <span id="clock" class="pulse">--:--:--</span></div>
-            <div class="strategy-tag">V32 SOVEREIGN</div>
+            <div class="time-sync">SYNC: <span id="clock">--:--:--</span></div>
+            <div style="font-size:10px; color:var(--gold);">V33 SOVEREIGN PRO</div>
         </div>
 
+        <div id="trapAlert" class="trap-alert">⚠️ تحذير: الخوارزمية في وضع "صيد الحيتان" - لا تتهور</div>
+
         <div class="signal-core">
-            <div id="mood" style="font-size:11px; color:#8b949e;">جاري قراءة نبض النظام...</div>
+            <div id="mood" style="font-size:10px; color:#8b949e;">جاري قراءة نبض الغرفة...</div>
             <div id="nextMove">---</div>
-            <div id="betAdvice" class="bet-value">أدخل آخر 4 جولات</div>
+            <div id="betAdvice" style="font-size:16px; color:var(--accent);">أدخل 4 جولات</div>
         </div>
 
         <div class="btn-grid">
             <button class="btn btn-d" onclick="add('تنين')">تنين</button>
             <button class="btn btn-t" onclick="add('نمر')">نمر</button>
+            <button class="btn btn-tie" onclick="add('تعادل')">TIE (تعادل)</button>
         </div>
     </div>
 
     <div class="h-strip" id="history"></div>
 
     <script>
-        let hist = JSON.parse(localStorage.getItem('dt_v32')) || [];
+        let hist = JSON.parse(localStorage.getItem('dt_v33')) || [];
         
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
-        }
+        function updateClock() { document.getElementById('clock').innerText = new Date().toTimeString().split(' ')[0]; }
         setInterval(updateClock, 1000);
-
-        function add(val) {
-            hist.push(val);
-            if(hist.length > 50) hist.shift();
-            localStorage.setItem('dt_v32', JSON.stringify(hist));
-            render();
-        }
 
         function speak(t) {
             let m = new SpeechSynthesisUtterance(t);
@@ -68,9 +59,19 @@
             window.speechSynthesis.speak(m);
         }
 
+        function add(val) {
+            hist.push(val);
+            if(hist.length > 50) hist.shift();
+            localStorage.setItem('dt_v33', JSON.stringify(hist));
+            render();
+        }
+
         function render() {
             const h = document.getElementById('history');
-            h.innerHTML = hist.slice().reverse().map(v => `<div class="dot" style="background:${v==='تنين'?'var(--d)':'var(--t)'}">${v[0]}</div>`).join('');
+            h.innerHTML = hist.slice().reverse().map(v => {
+                let color = v === 'تنين' ? 'var(--d)' : (v === 'نمر' ? 'var(--t)' : 'var(--tie)');
+                return `<div class="dot" style="background:${color}">${v[0]}</div>`;
+            }).join('');
             if(hist.length >= 4) analyze();
         }
 
@@ -78,40 +79,55 @@
             const move = document.getElementById('nextMove');
             const advice = document.getElementById('betAdvice');
             const mood = document.getElementById('mood');
+            const trap = document.getElementById('trapAlert');
             
             let last = hist[hist.length-1];
             let streak = 0;
             for(let i=hist.length-1; i>=0; i--) { if(hist[i] === last) streak++; else break; }
 
-            // خوارزمية الذكاء السيادي
             let next = "";
             let bet = "";
-            let moodTxt = "";
+            let moodTxt = "✅ النمط مستقر";
+            trap.style.display = "none";
 
-            // 1. كاشف التخفي (Skip Logic)
+            // 1. منطق التعادل (Tie Tracker)
+            let lastTie = hist.lastIndexOf('تعادل');
+            let tieGap = hist.length - 1 - lastTie;
+
+            // 2. وضع التخفي (Skip) كل 7 جولات
             if(hist.length % 7 === 0) {
                 next = "تخطي";
-                bet = "لا تراهن في هذه الجولة (تضليل)";
-                moodTxt = "⚠️ محاولة رصد من النظام - وضع التخفي مفعّل";
-            } else if (streak >= 4) {
+                bet = "لا تراهن (تضليل للنظام)";
+                moodTxt = "⚠️ وضع التخفي مفعّل لحماية رصيدك";
+            } 
+            else if (streak >= 4) {
                 next = last;
                 bet = "رهان قوي: 150,000";
-                moodTxt = "🔥 سلسلة قطار ذهبية - استمر";
-            } else if (hist[hist.length-1] !== hist[hist.length-2]) {
+                moodTxt = "🔥 سلسلة قطار - لا تكسرها";
+                if(streak > 5) trap.style.display = "block";
+            } 
+            else if (last === 'تعادل') {
+                next = "تريث";
+                bet = "انتظر جولة واحدة بعد التعادل";
+                moodTxt = "🔄 الخوارزمية تعيد التشغيل بعد التعادل";
+            }
+            else {
                 next = (last === 'تنين') ? 'نمر' : 'تنين';
                 bet = "رهان: 50,000";
-                moodTxt = "🔄 نمط قفز مستقر";
-            } else {
-                next = (last === 'تنين') ? 'نمر' : 'تنين';
-                bet = "رهان تأمين: 20,000";
-                moodTxt = "⚖️ توازن الخوارزمية";
+                moodTxt = "🔄 نمط قفز ديناميكي";
+            }
+
+            // تنبيه التعادل الجانبي
+            if(tieGap > 15) {
+                bet += " + (10k تعادل)";
+                moodTxt = "🎯 رادار التعادل نشط";
             }
 
             move.innerText = next;
             move.style.color = (next === 'تنين') ? 'var(--d)' : (next === 'نمر' ? 'var(--t)' : 'var(--accent)');
             advice.innerText = bet;
             mood.innerText = moodTxt;
-            speak(next === "تخطي" ? "تخطى الجولة" : next);
+            speak(next === "تخطي" ? "تخطى" : next);
         }
         render();
     </script>
