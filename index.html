@@ -3,126 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوت Crazy Box V26 - الذكاء الديناميكي</title>
+    <title>Dragon Tiger SOVEREIGN V32</title>
     <style>
-        :root { --gold: #fbbf24; --bg: #020617; --card: #1e293b; --neon: #22d3ee; --danger: #f87171; }
-        body { font-family: sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        .main-card { background: var(--card); border: 2px solid var(--neon); border-radius: 15px; padding: 15px; width: 95%; max-width: 440px; box-shadow: 0 0 25px rgba(34,211,238,0.2); }
-        .prediction-area { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
-        .pred-box { background: rgba(0,0,0,0.4); border: 1px solid #334155; border-radius: 10px; padding: 15px; text-align: center; position: relative; overflow: hidden; }
-        .pred-box.primary { border-color: var(--gold); background: rgba(251,191,36,0.1); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251,191,36,0.4); } 70% { box-shadow: 0 0 0 10px rgba(251,191,36,0); } 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); } }
-        
-        .box-num { font-size: 24px; font-weight: bold; color: var(--gold); }
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 95%; max-width: 440px; margin-top: 20px; }
-        button { padding: 18px 5px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; background: #334155; color: white; transition: 0.2s; }
-        button:active { background: var(--neon); color: black; }
-        .history { display: flex; gap: 6px; overflow-x: auto; padding: 10px; width: 95%; max-width: 440px; margin-top: 15px; background: #000; border-radius: 8px; min-height: 45px; border: 1px solid #1e293b; }
-        .h-item { min-width: 35px; height: 35px; background: #334155; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
-        .h-last { border: 2px solid var(--neon); color: var(--neon); }
+        :root { --d: #ff4d4d; --t: #4d94ff; --bg: #010409; --accent: #00ffcc; --gold: #ffd700; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        .master-panel { background: linear-gradient(145deg, #0d1117, #161b22); border: 2px solid #30363d; border-radius: 25px; padding: 20px; width: 95%; max-width: 450px; box-shadow: 0 0 50px rgba(0,255,204,0.1); position: relative; overflow: hidden; }
+        .sovereign-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .time-sync { font-size: 10px; color: var(--accent); letter-spacing: 1px; }
+        .signal-core { text-align: center; padding: 30px 10px; background: rgba(0,0,0,0.5); border-radius: 20px; border: 1px dashed #30363d; margin-bottom: 20px; }
+        #nextMove { font-size: 50px; font-weight: 900; text-transform: uppercase; margin: 10px 0; }
+        .strategy-tag { background: var(--gold); color: black; padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; }
+        .bet-value { font-size: 18px; color: #fff; margin-top: 10px; font-family: monospace; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn { padding: 22px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        .btn-d { background: var(--d); box-shadow: 0 4px 0 #8b0000; }
+        .btn-t { background: var(--t); box-shadow: 0 4px 0 #00008b; }
+        .h-strip { display: flex; gap: 5px; overflow-x: auto; padding: 15px; width: 95%; max-width: 450px; }
+        .dot { min-width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid rgba(255,255,255,0.1); }
+        .pulse { animation: p-glow 2s infinite; }
+        @keyframes p-glow { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
     </style>
 </head>
 <body>
 
-    <div class="main-card">
-        <div style="text-align:center; margin-bottom:10px;">
-            <h3 style="margin:0; color:var(--neon)">V26 DYNAMIC ANALYZER</h3>
-            <div id="mood" style="font-size:10px; color:var(--gold)">جاري قراءة "مزاج" الغرفة...</div>
+    <div class="master-panel">
+        <div class="sovereign-header">
+            <div class="time-sync">TIME-SYNC: <span id="clock" class="pulse">--:--:--</span></div>
+            <div class="strategy-tag">V32 SOVEREIGN</div>
         </div>
 
-        <div class="prediction-area" id="predictionArea">
-            </div>
+        <div class="signal-core">
+            <div id="mood" style="font-size:11px; color:#8b949e;">جاري قراءة نبض النظام...</div>
+            <div id="nextMove">---</div>
+            <div id="betAdvice" class="bet-value">أدخل آخر 4 جولات</div>
+        </div>
 
-        <div id="smartAlert" style="font-size:11px; text-align:center; padding:8px; background:rgba(255,255,255,0.05); border-radius:5px;">
-            بانتظار البيانات...
+        <div class="btn-grid">
+            <button class="btn btn-d" onclick="add('تنين')">تنين</button>
+            <button class="btn btn-t" onclick="add('نمر')">نمر</button>
         </div>
     </div>
 
-    <div class="history" id="historyBar"></div>
-
-    <div class="btn-grid">
-        <button onclick="inputResult(1)">1</button>
-        <button onclick="inputResult(2)">2</button>
-        <button onclick="inputResult(3)">3</button>
-        <button onclick="inputResult(4)">4</button>
-        <button onclick="inputResult(5)">5</button>
-        <button onclick="inputResult(6)">6</button>
-        <button onclick="inputResult(7)">7</button>
-        <button onclick="inputResult(8)">8</button>
-    </div>
+    <div class="h-strip" id="history"></div>
 
     <script>
-        let history = JSON.parse(localStorage.getItem('cb_v26')) || [];
-        const boxes = [
-            {id:1, x:5}, {id:2, x:5}, {id:3, x:5}, {id:4, x:8},
-            {id:5, x:10}, {id:6, x:12}, {id:7, x:15}, {id:8, x:25}
-        ];
+        let hist = JSON.parse(localStorage.getItem('dt_v32')) || [];
+        
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
+        }
+        setInterval(updateClock, 1000);
 
-        function inputResult(n) {
-            history.push(n);
-            if(history.length > 40) history.shift();
-            localStorage.setItem('cb_v26', JSON.stringify(history));
-            update();
+        function add(val) {
+            hist.push(val);
+            if(hist.length > 50) hist.shift();
+            localStorage.setItem('dt_v32', JSON.stringify(hist));
+            render();
         }
 
-        function update() {
-            const hBar = document.getElementById('historyBar');
-            hBar.innerHTML = history.slice().reverse().map((n, i) => 
-                `<div class="h-item ${i===0?'h-last':''}">${n}</div>`
-            ).join('');
-
-            if(history.length < 5) return;
-            calculate();
+        function speak(t) {
+            let m = new SpeechSynthesisUtterance(t);
+            m.lang = 'ar-SA';
+            window.speechSynthesis.speak(m);
         }
 
-        function calculate() {
-            const area = document.getElementById('predictionArea');
-            const alert = document.getElementById('smartAlert');
+        function render() {
+            const h = document.getElementById('history');
+            h.innerHTML = hist.slice().reverse().map(v => `<div class="dot" style="background:${v==='تنين'?'var(--d)':'var(--t)'}">${v[0]}</div>`).join('');
+            if(hist.length >= 4) analyze();
+        }
+
+        function analyze() {
+            const move = document.getElementById('nextMove');
+            const advice = document.getElementById('betAdvice');
             const mood = document.getElementById('mood');
             
-            let last = history[history.length - 1];
-            let last3 = history.slice(-3);
-            
-            // تحليل "المزاج"
-            let smallCount = last3.filter(x => x <= 3).length;
-            if(smallCount >= 3) mood.innerText = "⚠️ الخوارزمية في وضع 'توفير' - توقع انفجار متوسط قريباً";
-            else mood.innerText = "✅ الخوارزمية في وضع 'توزيع' متوازن";
+            let last = hist[hist.length-1];
+            let streak = 0;
+            for(let i=hist.length-1; i>=0; i--) { if(hist[i] === last) streak++; else break; }
 
-            let scores = boxes.map(b => {
-                let lastSeen = history.lastIndexOf(b.id);
-                let gap = lastSeen === -1 ? 15 : (history.length - 1 - lastSeen);
-                
-                // الوزن الأساسي
-                let s = gap * 15;
+            // خوارزمية الذكاء السيادي
+            let next = "";
+            let bet = "";
+            let moodTxt = "";
 
-                // منع التعليق القاتل: إذا غاب الصندوق أكثر من 15 جولة، لا تعطِه الأولوية القصوى فوراً
-                if(gap > 15) s *= 0.7; 
+            // 1. كاشف التخفي (Skip Logic)
+            if(hist.length % 7 === 0) {
+                next = "تخطي";
+                bet = "لا تراهن في هذه الجولة (تضليل)";
+                moodTxt = "⚠️ محاولة رصد من النظام - وضع التخفي مفعّل";
+            } else if (streak >= 4) {
+                next = last;
+                bet = "رهان قوي: 150,000";
+                moodTxt = "🔥 سلسلة قطار ذهبية - استمر";
+            } else if (hist[hist.length-1] !== hist[hist.length-2]) {
+                next = (last === 'تنين') ? 'نمر' : 'تنين';
+                bet = "رهان: 50,000";
+                moodTxt = "🔄 نمط قفز مستقر";
+            } else {
+                next = (last === 'تنين') ? 'نمر' : 'تنين';
+                bet = "رهان تأمين: 20,000";
+                moodTxt = "⚖️ توازن الخوارزمية";
+            }
 
-                // قاعدة "القفز": إذا طلع 1، فالأقرب هو 3 أو 4 (وليس 2 دائماً)
-                if(Math.abs(b.id - last) === 2) s += 60;
-                
-                // تجنب التكرار المباشر
-                if(b.id === last) s = -500;
-
-                // تعزيز الأرقام المتوسطة إذا تكررت الصغيرة
-                if(smallCount >= 3 && b.id >= 4 && b.id <= 6) s += 100;
-
-                return { ...b, score: s, gap: gap };
-            }).sort((a,b) => b.score - a.score);
-
-            let top4 = scores.slice(0, 4);
-
-            area.innerHTML = top4.map((p, i) => `
-                <div class="pred-box ${i<2?'primary':''}">
-                    <div class="box-num">${p.id}</div>
-                    <div style="font-size:10px; color:#94a3b8">${p.x}x | غائب ${p.gap}</div>
-                    <div style="font-size:9px; margin-top:4px; color:var(--neon)">${i<2?'أولوية قصوى':'تأمين ذكي'}</div>
-                </div>
-            `).join('');
-
-            alert.innerHTML = `توقع الجولة القادمة: ركز على <b style="color:var(--gold)">${top4[0].id}</b> و <b style="color:var(--gold)">${top4[1].id}</b>`;
+            move.innerText = next;
+            move.style.color = (next === 'تنين') ? 'var(--d)' : (next === 'نمر' ? 'var(--t)' : 'var(--accent)');
+            advice.innerText = bet;
+            mood.innerText = moodTxt;
+            speak(next === "تخطي" ? "تخطى الجولة" : next);
         }
-        update();
+        render();
     </script>
 </body>
 </html>
